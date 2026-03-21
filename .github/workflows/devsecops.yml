@@ -1,0 +1,259 @@
+# ──────────────────────────────────────────────────
+# Pipeline DevSecOps — Secure Workspace
+# Integra seguridad en todas las fases del CI/CD
+# ──────────────────────────────────────────────────
+
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  IMAGE_API: secure-workspace-api
+  IMAGE_FRONTEND: secure-workspace-frontend
+  IMAGE_WORKER: secure-workspace-worker
+
+jobs:
+  # ══════════════════════════════════════════
+  # FASE 1: CÓDIGO — Análisis estático (SAST)
+  # ══════════════════════════════════════════
+  code-security:
+    name: "🔍 Análisis de Código"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Gitleaks — Detección de secretos filtrados
+      - name: "🔑 Gitleaks — Detección de secretos"
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Bandit — SAST para Python
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: "🐍 Bandit — Análisis de seguridad Python"
+        run: |
+          pip install bandit
+          bandit -r api-gateway/app/ -f json -o bandit-report.json || true
+          bandit -r api-gateway/app/ -ll
+          bandit -r worker/ -ll
+
+      # Semgrep — Reglas de seguridad
+      - name: "🔎 Semgrep — Patrones de seguridad"
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/python
+            p/security-audit
+            p/owasp-top-ten
+
+      - name: Subir reportes de seguridad
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-security-reports
+          path: |
+            bandit-report.json
+
+  # ══════════════════════════════════════════
+  # FASE 2: DEPENDENCIAS — Análisis SCA
+  # ══════════════════════════════════════════
+  dependency-scan:
+    name: "📦 Análisis de Dependencias"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Trivy — Escaneo SCA de dependencias Python
+      - name: "🔒 Trivy — Escaneo de dependencias API"
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './api-gateway'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: "🔒 Trivy — Escaneo de dependencias Worker"
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './worker'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+  # ══════════════════════════════════════════
+  # FASE 3: BUILD — Construcción y escaneo de imágenes
+  # ══════════════════════════════════════════
+  build-and-scan:
+    name: "🏗️ Build y Escaneo de Imágenes"
+    runs-on: ubuntu-latest
+    needs: [code-security, dependency-scan]
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Construir imágenes Docker
+      - name: "🐳 Build — API Gateway"
+        run: docker build -t $IMAGE_API:${{ github.sha }} ./api-gateway
+
+      - name: "🐳 Build — Worker"
+        run: docker build -t $IMAGE_WORKER:${{ github.sha }} ./worker
+
+      - name: "🐳 Build — Frontend"
+        run: docker build -t $IMAGE_FRONTEND:${{ github.sha }} ./frontend
+
+      # Trivy — Escaneo de imágenes Docker
+      - name: "🔒 Trivy — Escaneo imagen API"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_API }}:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+      - name: "🔒 Trivy — Escaneo imagen Worker"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_WORKER }}:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+      - name: "🔒 Trivy — Escaneo imagen Frontend"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_FRONTEND }}:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+  # ══════════════════════════════════════════
+  # FASE 4: TEST — Pruebas unitarias
+  # ══════════════════════════════════════════
+  test:
+    name: "🧪 Pruebas Unitarias"
+    runs-on: ubuntu-latest
+    needs: [code-security]
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: |
+          cd api-gateway
+          pip install -r requirements.txt
+
+      - name: "✅ Ejecutar Pytest"
+        run: |
+          cd api-gateway
+          pytest tests/ -v --tb=short
+        env:
+          DATABASE_URL: "sqlite:///./test.db"
+          JWT_SECRET_KEY: "test-secret-key-only-for-ci"
+          REDIS_URL: "redis://localhost:6379/0"
+
+  # ══════════════════════════════════════════
+  # FASE 5: DAST — Análisis dinámico (opcional)
+  # ══════════════════════════════════════════
+  dast:
+    name: "🌐 OWASP ZAP (DAST)"
+    runs-on: ubuntu-latest
+    needs: [build-and-scan, test]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python y dependencias
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Levantar API para escaneo
+        run: |
+          cd api-gateway
+          pip install -r requirements.txt
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+        env:
+          DATABASE_URL: "sqlite:///./test.db"
+          JWT_SECRET_KEY: "test-secret-key-only-for-ci"
+          REDIS_URL: "redis://localhost:6379/0"
+
+      - name: "🕷️ OWASP ZAP — Escaneo de API"
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: 'http://localhost:8000/openapi.json'
+          fail_action: false
+          cmd_options: '-a'
+
+  # ══════════════════════════════════════════
+  # FASE 6: RELEASE — Publicación de imágenes
+  # ══════════════════════════════════════════
+  release:
+    name: "🚀 Release — Docker Hub"
+    runs-on: ubuntu-latest
+    needs: [build-and-scan, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # Extraer versión del tag
+      - name: Obtener versión
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      # Build y push de imágenes con tag de versión
+      - name: "📦 Build & Push — API Gateway"
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api-gateway
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_API }}:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_API }}:latest
+
+      - name: "📦 Build & Push — Worker"
+        uses: docker/build-push-action@v5
+        with:
+          context: ./worker
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_WORKER }}:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_WORKER }}:latest
+
+      - name: "📦 Build & Push — Frontend"
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_FRONTEND }}:latest

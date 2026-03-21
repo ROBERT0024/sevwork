@@ -1,0 +1,384 @@
+/* ──── Estilos Globales — Secure Workspace ──── */
+/* Diseño minimalista y funcional enfocado en DevSecOps */
+
+:root {
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-surface-hover: #222636;
+  --color-border: #2a2e3d;
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+  --color-text: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-success: #22c55e;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ──── Login ──── */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0f1117 0%, #1e1b4b 50%, #0f1117 100%);
+}
+
+.login-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header .logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.login-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.login-header p {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.form-group input,
+.create-note-card input,
+.create-note-card textarea {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: var(--font);
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-group input:focus,
+.create-note-card input:focus,
+.create-note-card textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  padding: 8px;
+}
+
+.btn-link:hover {
+  color: var(--color-primary-hover);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+/* ──── Dashboard ──── */
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-left h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.logo-small {
+  font-size: 24px;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.dashboard-content {
+  display: flex;
+  flex: 1;
+}
+
+/* ──── Sidebar ──── */
+
+.sidebar {
+  width: 240px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: 20px;
+}
+
+.sidebar h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.workspace-list {
+  list-style: none;
+}
+
+.workspace-list li {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.workspace-list li:hover {
+  background: var(--color-surface-hover);
+}
+
+.workspace-list li.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--color-primary-hover);
+}
+
+/* ──── Contenido Principal ──── */
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 800px;
+}
+
+.create-note-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.create-note-card h2 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.create-note-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-note-card textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ──── Tarjetas de Notas ──── */
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.note-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  transition: border-color 0.2s;
+}
+
+.note-card:hover {
+  border-color: var(--color-primary);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.note-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.note-content {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.note-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 18px;
+  color: var(--color-text-secondary);
+}
+
+/* ──── Responsivo ──── */
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}
