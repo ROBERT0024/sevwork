@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # ──── Etapa 2: Servidor de producción ────
-FROM nginx:alpine
+FROM nginx:1.27-alpine-slim
 
 # Metadatos
 LABEL maintainer="secure-workspace"
