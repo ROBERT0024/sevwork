@@ -18,6 +18,10 @@ RUN npm run build
 # ──── Etapa 2: Servidor de producción ────
 FROM nginx:1.27-alpine-slim
 
+# Actualizar paquetes del sistema para corregir CVEs con parche disponible
+# Específicamente: libcrypto3 >= 3.3.6-r0 (CVE-2025-15467)
+RUN apk upgrade --no-cache
+
 # Metadatos
 LABEL maintainer="secure-workspace"
 LABEL description="Frontend - Secure Workspace"
