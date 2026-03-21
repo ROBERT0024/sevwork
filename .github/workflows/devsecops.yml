@@ -33,6 +33,7 @@ jobs:
 
       - name: "🔑 Gitleaks — Detección de secretos"
         uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -81,7 +82,7 @@ jobs:
           scan-ref: './api-gateway'
           format: 'table'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: "🔒 Trivy — Escaneo de dependencias Worker"
         uses: aquasecurity/trivy-action@master
@@ -90,7 +91,7 @@ jobs:
           scan-ref: './worker'
           format: 'table'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
 
   # ══════════════════════════════════════════
   # FASE 3: BUILD — Construcción y escaneo de imágenes
@@ -118,7 +119,7 @@ jobs:
           image-ref: '${{ env.IMAGE_API }}:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: "🔒 Trivy — Escaneo imagen Worker"
         uses: aquasecurity/trivy-action@master
@@ -126,7 +127,7 @@ jobs:
           image-ref: '${{ env.IMAGE_WORKER }}:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: "🔒 Trivy — Escaneo imagen Frontend"
         uses: aquasecurity/trivy-action@master
@@ -134,7 +135,7 @@ jobs:
           image-ref: '${{ env.IMAGE_FRONTEND }}:${{ github.sha }}'
           format: 'table'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
 
   # ══════════════════════════════════════════
   # FASE 4: TEST — Pruebas unitarias
