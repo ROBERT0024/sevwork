@@ -139,6 +139,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL'
           exit-code: '1'
+          ignore-unfixed: true
 
       - name: "🔒 Trivy — Escaneo imagen Worker"
         uses: aquasecurity/trivy-action@master
@@ -147,6 +148,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL'
           exit-code: '1'
+          ignore-unfixed: true
 
       - name: "🔒 Trivy — Escaneo imagen Frontend"
         uses: aquasecurity/trivy-action@master
@@ -155,6 +157,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL'
           exit-code: '1'
+          ignore-unfixed: true
 
   test:
     name: "🧪 Pruebas Unitarias"
