@@ -1,46 +1,54 @@
 # Router de notas — Secure Workspace
-# Endpoints: listar, crear y eliminar notas (protegidos por JWT, IDOR-safe)
-# Al crear una nota se despacha una tarea Celery para contar palabras
+# Endpoints: listar, crear, editar y eliminar notas (protegidos por JWT, IDOR-safe)
+# Al crear/editar una nota se despacha una tarea Celery para contar palabras
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.database import get_db
 from app.models import User, Note, Workspace
-from app.schemas import NoteCreate, NoteResponse
+from app.schemas import NoteCreate, NoteUpdate, NoteResponse
 from app.deps import get_current_user
 
 router = APIRouter(prefix="/notes", tags=["Notas"])
 
 
 def _dispatch_word_count(note_id: int):
-    """Despacha la tarea de conteo de palabras al worker Celery.
-    Se importa dentro de la función para evitar errores si Redis no está disponible."""
+    """Despacha la tarea de conteo de palabras al worker Celery."""
     try:
         from celery import Celery
         from app.config import settings
         celery_app = Celery("worker", broker=settings.REDIS_URL)
         celery_app.send_task("tasks.count_words", args=[note_id])
     except Exception:
-        # Si el worker no está disponible, se continúa sin error
         pass
 
 
 @router.get("/", response_model=List[NoteResponse])
 def list_notes(
-    workspace_id: int = None,
+    workspace_id: Optional[int] = None,
+    search: Optional[str] = Query(None, max_length=255),
+    tag: Optional[str] = Query(None, max_length=50),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Lista las notas del usuario autenticado.
-    Opcionalmente filtra por workspace_id.
+    Filtra por workspace_id, búsqueda de texto y etiqueta.
     Protección IDOR: solo retorna notas donde user_id == current_user.id.
     """
     query = db.query(Note).filter(Note.user_id == current_user.id)
     if workspace_id:
         query = query.filter(Note.workspace_id == workspace_id)
-    return query.order_by(Note.created_at.desc()).all()
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            Note.title.ilike(search_term) | Note.content.ilike(search_term)
+        )
+    if tag:
+        query = query.filter(Note.tag == tag)
+    # Notas fijadas primero, luego por fecha descendente
+    return query.order_by(Note.is_pinned.desc(), Note.updated_at.desc()).all()
 
 
 @router.post("/", response_model=NoteResponse, status_code=status.HTTP_201_CREATED)
@@ -49,11 +57,7 @@ def create_note(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Crea una nueva nota.
-    - Verifica que el workspace pertenezca al usuario (IDOR protection).
-    - Despacha tarea Celery para conteo de palabras.
-    """
-    # Verificar que el workspace pertenece al usuario
+    """Crea una nueva nota con soporte para etiquetas y tipo."""
     workspace = db.query(Workspace).filter(
         Workspace.id == note_data.workspace_id,
         Workspace.user_id == current_user.id,
@@ -69,14 +73,53 @@ def create_note(
         content=note_data.content,
         workspace_id=note_data.workspace_id,
         user_id=current_user.id,
+        tag=note_data.tag,
+        note_type=note_data.note_type,
+        is_pinned=note_data.is_pinned,
     )
     db.add(note)
     db.commit()
     db.refresh(note)
 
-    # Despachar tarea asíncrona de conteo de palabras
     _dispatch_word_count(note.id)
+    return note
 
+
+@router.put("/{note_id}", response_model=NoteResponse)
+def update_note(
+    note_id: int,
+    note_data: NoteUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Actualiza una nota existente (título, contenido, etiqueta, pin).
+    Protección IDOR: solo permite editar notas propias.
+    """
+    note = db.query(Note).filter(
+        Note.id == note_id,
+        Note.user_id == current_user.id,
+    ).first()
+    if not note:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nota no encontrada",
+        )
+
+    if note_data.title is not None:
+        note.title = note_data.title
+    if note_data.content is not None:
+        note.content = note_data.content
+    if note_data.tag is not None:
+        note.tag = note_data.tag
+    if note_data.is_pinned is not None:
+        note.is_pinned = note_data.is_pinned
+
+    import datetime
+    note.updated_at = datetime.datetime.utcnow()
+    db.commit()
+    db.refresh(note)
+
+    _dispatch_word_count(note.id)
     return note
 
 

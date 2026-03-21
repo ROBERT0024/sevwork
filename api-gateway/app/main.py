@@ -5,9 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
-from app.routers import auth, workspaces, notes
+from app.routers import auth, workspaces, notes, tasks
 
-# Crear todas las tablas en la base de datos
+# Crear todas las tablas en la base de datos (incluye nuevas: tasks, campos tag/pinned)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(workspaces.router)
 app.include_router(notes.router)
+app.include_router(tasks.router)
 
 
 @app.get("/", tags=["Salud"])

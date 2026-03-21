@@ -50,16 +50,39 @@ export const getWorkspaces = () => api.get('/workspaces/');
 export const createWorkspace = (name, description = '') =>
   api.post('/workspaces/', { name, description });
 
+export const deleteWorkspace = (wsId) => api.delete(`/workspaces/${wsId}`);
+
 // ──── Endpoints de Notas ────
 
-export const getNotes = (workspaceId = null) => {
-  const params = workspaceId ? { workspace_id: workspaceId } : {};
+export const getNotes = (workspaceId = null, search = '', tag = '') => {
+  const params = {};
+  if (workspaceId) params.workspace_id = workspaceId;
+  if (search) params.search = search;
+  if (tag) params.tag = tag;
   return api.get('/notes/', { params });
 };
 
-export const createNote = (title, content, workspaceId) =>
-  api.post('/notes/', { title, content, workspace_id: workspaceId });
+export const createNote = (title, content, workspaceId, tag = '', note_type = 'note', is_pinned = false) =>
+  api.post('/notes/', { title, content, workspace_id: workspaceId, tag, note_type, is_pinned });
+
+export const updateNote = (noteId, data) =>
+  api.put(`/notes/${noteId}`, data);
 
 export const deleteNote = (noteId) => api.delete(`/notes/${noteId}`);
+
+// ──── Endpoints de Tareas ────
+
+export const getTasks = (workspaceId = null) => {
+  const params = workspaceId ? { workspace_id: workspaceId } : {};
+  return api.get('/tasks/', { params });
+};
+
+export const createTask = (title, workspaceId) =>
+  api.post('/tasks/', { title, workspace_id: workspaceId });
+
+export const updateTask = (taskId, data) =>
+  api.patch(`/tasks/${taskId}`, data);
+
+export const deleteTask = (taskId) => api.delete(`/tasks/${taskId}`);
 
 export default api;

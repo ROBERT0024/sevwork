@@ -2,7 +2,7 @@
 # Validación de entradas y respuestas para todos los endpoints
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -65,6 +65,17 @@ class NoteCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     content: str = Field(default="", max_length=50000)
     workspace_id: int
+    tag: str = Field(default="", max_length=50)
+    note_type: str = Field(default="note", max_length=20)  # "note" | "task"
+    is_pinned: bool = False
+
+
+class NoteUpdate(BaseModel):
+    """Esquema para actualizar una nota."""
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    content: Optional[str] = Field(None, max_length=50000)
+    tag: Optional[str] = Field(None, max_length=50)
+    is_pinned: Optional[bool] = None
 
 
 class NoteResponse(BaseModel):
@@ -73,6 +84,37 @@ class NoteResponse(BaseModel):
     title: str
     content: str
     word_count: int
+    workspace_id: int
+    user_id: int
+    tag: str
+    note_type: str
+    is_pinned: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ──── Tasks ────
+
+class TaskCreate(BaseModel):
+    """Esquema para crear una tarea."""
+    title: str = Field(..., min_length=1, max_length=255)
+    workspace_id: int
+
+
+class TaskUpdate(BaseModel):
+    """Esquema para actualizar una tarea."""
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    completed: Optional[bool] = None
+
+
+class TaskResponse(BaseModel):
+    """Respuesta de una tarea."""
+    id: int
+    title: str
+    completed: bool
     workspace_id: int
     user_id: int
     created_at: datetime
