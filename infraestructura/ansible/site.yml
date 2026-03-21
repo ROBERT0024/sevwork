@@ -1,0 +1,121 @@
+# Playbook principal de Ansible — Secure Workspace
+# Automatiza el despliegue de la aplicación con Docker Compose
+# Uso: ansible-playbook -i inventory.ini site.yml
+
+---
+- name: Desplegar Secure Workspace
+  hosts: servidores_app
+  become: true
+  vars:
+    proyecto_dir: /opt/secure-workspace
+    repo_url: "https://github.com/ROBERT0024/sevwork.git"
+    rama: main
+    compose_version: "2.24.0"
+
+  tasks:
+    # ── Paso 1: Instalar dependencias del sistema ──
+    - name: Actualizar apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependencias necesarias
+      apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+          - git
+          - python3-pip
+          - curl
+        state: present
+
+    # ── Paso 2: Configurar Docker ──
+    - name: Habilitar y arrancar servicio Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Agregar usuario al grupo docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    # ── Paso 3: Clonar o actualizar el repositorio ──
+    - name: Clonar repositorio del proyecto
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ proyecto_dir }}"
+        version: "{{ rama }}"
+        force: yes
+
+    # ── Paso 4: Configurar variables de entorno ──
+    - name: Crear archivo .env desde plantilla
+      copy:
+        src: "{{ proyecto_dir }}/.env.example"
+        dest: "{{ proyecto_dir }}/.env"
+        remote_src: yes
+        force: no
+      notify: Reiniciar servicios
+
+    - name: Configurar contraseña segura de PostgreSQL
+      lineinfile:
+        path: "{{ proyecto_dir }}/.env"
+        regexp: '^POSTGRES_PASSWORD='
+        line: "POSTGRES_PASSWORD={{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+      notify: Reiniciar servicios
+
+    - name: Configurar clave JWT segura
+      lineinfile:
+        path: "{{ proyecto_dir }}/.env"
+        regexp: '^JWT_SECRET_KEY='
+        line: "JWT_SECRET_KEY={{ lookup('password', '/dev/null length=64 chars=ascii_letters,digits') }}"
+      notify: Reiniciar servicios
+
+    # ── Paso 5: Desplegar con Docker Compose ──
+    - name: Construir y levantar servicios
+      community.docker.docker_compose_v2:
+        project_src: "{{ proyecto_dir }}"
+        build: always
+        state: present
+      register: resultado_compose
+
+    - name: Mostrar estado de los contenedores
+      debug:
+        msg: "Servicios desplegados correctamente en {{ proyecto_dir }}"
+
+    # ── Paso 6: Verificar salud de los servicios ──
+    - name: Esperar a que la API esté lista
+      uri:
+        url: "http://localhost:8000/"
+        status_code: 200
+      register: api_health
+      retries: 10
+      delay: 5
+      until: api_health.status == 200
+
+    - name: Esperar a que el frontend esté listo
+      uri:
+        url: "http://localhost:3000/"
+        status_code: 200
+      register: frontend_health
+      retries: 10
+      delay: 5
+      until: frontend_health.status == 200
+
+    - name: Mostrar resultado final
+      debug:
+        msg: |
+          ✅ Secure Workspace desplegado exitosamente
+          🌐 Frontend: http://{{ ansible_host }}:3000
+          🖥️ API: http://{{ ansible_host }}:8000
+          📖 API Docs: http://{{ ansible_host }}:8000/docs
+
+  handlers:
+    - name: Reiniciar servicios
+      community.docker.docker_compose_v2:
+        project_src: "{{ proyecto_dir }}"
+        build: always
+        state: present
+        recreate: always

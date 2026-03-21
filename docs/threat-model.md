@@ -1,47 +1,126 @@
 # Modelo de Amenazas — Secure Workspace
 
-## Activos
+## Metodología
 
-| Activo | Sensibilidad | Ubicación |
-|--------|-------------|-----------|
-| Credenciales de usuario | ALTA | PostgreSQL (hash bcrypt) |
-| Tokens JWT | ALTA | Lado del cliente (localStorage) |
-| Contenido de notas | MEDIA | PostgreSQL |
-| Secretos del entorno | ALTA | Archivos `.env`, secretos de CI/CD |
+Este modelo de amenazas sigue la metodología **STRIDE** de Microsoft y utiliza diagramas de flujo de datos (DFD) para identificar puntos de entrada y activos en riesgo.
 
-## Categorías de Amenazas (STRIDE)
+## DFD Nivel 0 — Contexto del Sistema
+
+```mermaid
+graph LR
+    U["👤 Usuario"] -->|"HTTPS"| SW["🔒 Secure Workspace"]
+    SW -->|"Respuesta"| U
+    SW -->|"Notificaciones futuras"| U
+```
+
+> El DFD nivel 0 muestra el sistema como una caja negra que recibe peticiones HTTP del usuario y devuelve respuestas con datos del workspace/notas.
+
+## DFD Nivel 1 — Flujo Interno de Datos
+
+```mermaid
+graph TB
+    U["👤 Usuario<br/>(entidad externa)"]
+
+    subgraph "Límite de Confianza — Docker Network"
+        FE["1.0 Frontend<br/>(proceso)"]
+        API["2.0 API Gateway<br/>(proceso)"]
+        AUTH["2.1 Autenticación<br/>(subproceso)"]
+        WK["3.0 Worker<br/>(proceso)"]
+        PG[("D1: PostgreSQL<br/>(almacén de datos)")]
+        RD[("D2: Redis<br/>(almacén temporal)")]
+    end
+
+    U -->|"1. Credenciales / datos"| FE
+    FE -->|"2. HTTP + JWT"| API
+    API --> AUTH
+    AUTH -->|"3. Verifica hash"| PG
+    API -->|"4. CRUD datos"| PG
+    API -->|"5. Despacha tarea"| RD
+    RD -->|"6. Consume tarea"| WK
+    WK -->|"7. Actualiza datos"| PG
+    PG -->|"8. Resultados"| API
+    API -->|"9. Respuesta JSON"| FE
+    FE -->|"10. UI renderizada"| U
+```
+
+## Activos Críticos
+
+| Activo | Sensibilidad | Ubicación | Protección |
+|--------|-------------|-----------|------------|
+| Credenciales de usuario | 🔴 ALTA | PostgreSQL (hash bcrypt) | bcrypt + salt, nunca en texto plano |
+| Tokens JWT | 🔴 ALTA | Cliente (localStorage) | Expiración 30 min, firmados con HS256 |
+| Contenido de notas | 🟡 MEDIA | PostgreSQL | IDOR protegido, solo dueño accede |
+| Secretos del entorno | 🔴 ALTA | .env, GitHub Secrets | .gitignore, Gitleaks en CI |
+| Imágenes Docker | 🟡 MEDIA | Docker Hub | Trivy escanea CVEs, usuario no-root |
+
+## Análisis STRIDE Detallado
 
 ### Suplantación (Spoofing)
-- **Amenaza**: Un atacante falsifica la identidad para acceder a datos de otro usuario.
-- **Mitigación**: JWT con expiración, hash de contraseñas con bcrypt, rotación de refresh tokens.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Atacante falsifica JWT | Media | Alto | JWT firmado con HS256, expiración 30 min |
+| Reutilización de token robado | Media | Alto | Expiración corta, refresh token separado |
+| Registro con email falso | Alta | Bajo | Validación de formato de email (Pydantic) |
 
 ### Manipulación (Tampering)
-- **Amenaza**: Modificación de datos en tránsito o en reposo.
-- **Mitigación**: HTTPS en producción, validación de entradas con Pydantic, consultas SQL parametrizadas vía ORM SQLAlchemy.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Inyección SQL | Baja | Crítico | ORM SQLAlchemy (consultas parametrizadas) |
+| XSS en contenido de notas | Media | Medio | React escapa HTML por defecto |
+| Modificar JWT en tránsito | Baja | Alto | Firma HS256, HTTPS en producción |
 
 ### Repudio (Repudiation)
-- **Amenaza**: El usuario niega haber realizado acciones.
-- **Mitigación**: Logging estructurado con timestamps e IDs de usuario.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Usuario niega acciones | Media | Medio | Timestamps en BD, logs con user_id |
+| Borrado sin rastro | Baja | Medio | Campo `created_at/updated_at` en modelos |
 
 ### Divulgación de Información (Information Disclosure)
-- **Amenaza**: Secretos filtrados en código, logs o imágenes de contenedores.
-- **Mitigación**: Gitleaks en CI, variables de entorno para secretos, contenedores no-root, escaneo de imágenes con Trivy.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Secretos en código fuente | Media | Crítico | Gitleaks en CI, .gitignore para .env |
+| IDOR — acceder notas de otro | Media | Alto | Filtro `user_id` en todas las queries |
+| Información sensible en logs | Baja | Medio | No se loguean contraseñas ni tokens |
+| CVEs en dependencias | Alta | Alto | Trivy SCA con exit-code: 1 |
 
 ### Denegación de Servicio (Denial of Service)
-- **Amenaza**: Agotamiento de recursos en la API o base de datos.
-- **Mitigación**: Rate limiting (futuro), connection pooling en SQLAlchemy.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Spam de registros | Alta | Medio | Rate limiting recomendado (futuro) |
+| Agotamiento de conexiones BD | Baja | Alto | Connection pooling (SQLAlchemy) |
+| Request flood | Media | Alto | Nginx como reverse proxy, healthchecks |
 
 ### Elevación de Privilegios (Elevation of Privilege)
-- **Amenaza**: Un usuario normal accede a endpoints de admin. IDOR para acceder a notas de otros usuarios.
-- **Mitigación**: Decorador de control de acceso basado en roles, verificación de propiedad en cada consulta.
+
+| Amenaza | Probabilidad | Impacto | Mitigación |
+|---------|-------------|---------|------------|
+| Usuario accede endpoints admin | Media | Crítico | Decorador `require_role` en FastAPI |
+| Escape de contenedor | Baja | Crítico | Usuario no-root, imágenes slim, red aislada |
+| Modificar variables de entorno | Baja | Alto | Secretos en GitHub, no en código |
 
 ## Superficie de Ataque
 
-| Punto de Entrada | Protocolo | Auth Requerida | Notas |
-|-----------------|----------|----------------|-------|
-| `POST /auth/register` | HTTP | No | Se recomienda rate limiting |
-| `POST /auth/login` | HTTP | No | Se recomienda protección contra fuerza bruta |
-| `GET/POST /workspaces` | HTTP | JWT | Limitado al usuario |
-| `GET/POST/DELETE /notes` | HTTP | JWT | Se verifica propiedad |
-| Redis | TCP | No (red interna) | No expuesto externamente |
-| PostgreSQL | TCP | Contraseña | No expuesto externamente |
+| Punto de Entrada | Protocolo | Auth Requerida | Riesgo | Mitigación |
+|-----------------|----------|----------------|--------|------------|
+| `POST /auth/register` | HTTP | No | Spam de cuentas | Validación de email, rate limiting |
+| `POST /auth/login` | HTTP | No | Fuerza bruta | Expiración de tokens, bcrypt lento |
+| `GET/POST /workspaces` | HTTP | JWT | IDOR | Filtro por user_id |
+| `GET/POST/DELETE /notes` | HTTP | JWT | IDOR, DoS | Filtro por user_id, validación |
+| Redis | TCP | No (red interna) | Acceso no autorizado | Red Docker aislada |
+| PostgreSQL | TCP | Contraseña | Data breach | Red Docker aislada, credenciales en .env |
+
+## Matriz de Riesgo
+
+```
+         │  Bajo   │  Medio  │  Alto   │ Crítico │
+─────────┼─────────┼─────────┼─────────┼─────────┤
+Alta     │         │ DoS reg │         │         │
+Media    │ Email   │ XSS     │ IDOR    │ Iny.SQL │
+Baja     │         │ Logs    │ BD pool │ Escape  │
+         │         │         │         │ contdor │
+```
