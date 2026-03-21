@@ -102,12 +102,16 @@ class TaskCreate(BaseModel):
     """Esquema para crear una tarea."""
     title: str = Field(..., min_length=1, max_length=255)
     workspace_id: int
+    priority: str = Field(default="medium", pattern="^(low|medium|high)$")
+    due_date: Optional[datetime] = None
 
 
 class TaskUpdate(BaseModel):
     """Esquema para actualizar una tarea."""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     completed: Optional[bool] = None
+    priority: Optional[str] = Field(None, pattern="^(low|medium|high)$")
+    due_date: Optional[datetime] = None
 
 
 class TaskResponse(BaseModel):
@@ -115,6 +119,8 @@ class TaskResponse(BaseModel):
     id: int
     title: str
     completed: bool
+    priority: str
+    due_date: Optional[datetime]
     workspace_id: int
     user_id: int
     created_at: datetime
