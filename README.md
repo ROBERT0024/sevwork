@@ -146,4 +146,5 @@ Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
 ## 👤 Autores
 
 **ROBERT0024** — Especialización en Ciberseguridad con énfasis en DevSecOps
+
 **diegohrnz89-ai** — Especialización en Ciberseguridad con énfasis en DevSecOps
