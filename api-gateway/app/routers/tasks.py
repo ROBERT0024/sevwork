@@ -17,13 +17,14 @@ router = APIRouter(prefix="/tasks", tags=["Tareas"])
 @router.get("/", response_model=List[TaskResponse])
 def list_tasks(
     workspace_id: Optional[int] = None,
+    is_trash: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Lista las tareas del usuario autenticado.
     Protección IDOR: solo retorna tareas donde user_id == current_user.id.
     """
-    query = db.query(Task).filter(Task.user_id == current_user.id)
+    query = db.query(Task).filter(Task.user_id == current_user.id, Task.is_deleted == is_trash)
     if workspace_id:
         query = query.filter(Task.workspace_id == workspace_id)
     return query.order_by(Task.completed.asc(), Task.created_at.desc()).all()
@@ -48,8 +49,11 @@ def create_task(
 
     task = Task(
         title=task_data.title,
+        description=task_data.description,
         workspace_id=task_data.workspace_id,
         user_id=current_user.id,
+        priority=task_data.priority,
+        due_date=task_data.due_date,
     )
     db.add(task)
     db.commit()
@@ -79,8 +83,18 @@ def update_task(
 
     if task_data.title is not None:
         task.title = task_data.title
+    if task_data.description is not None:
+        task.description = task_data.description
     if task_data.completed is not None:
         task.completed = task_data.completed
+    if task_data.priority is not None:
+        task.priority = task_data.priority
+    if task_data.due_date is not None:
+        task.due_date = task_data.due_date
+    if task_data.is_deleted is not None:
+        task.is_deleted = task_data.is_deleted
+    if task_data.is_pinned is not None:
+        task.is_pinned = task_data.is_pinned
 
     import datetime
     task.updated_at = datetime.datetime.utcnow()

@@ -1,6 +1,7 @@
-// Login.jsx — SevWork Premium Login
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { ShieldCheck, Mail, Lock, Eye, EyeOff, Loader2, Key, Cpu, ShieldAlert } from 'lucide-react';
 import { login, register } from '../services/api.js';
 
 function Login() {
@@ -8,143 +9,161 @@ function Login() {
   const [password,   setPassword]   = useState('');
   const [showPass,   setShowPass]   = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const [error,      setError]      = useState('');
   const [loading,    setLoading]    = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
-      if (isRegister) await register(email, password);
+      if (isRegister) {
+        await register(email, password);
+        toast.success("Cuenta creada exitosamente");
+      }
       const res = await login(email, password);
       localStorage.setItem('access_token',  res.data.access_token);
       localStorage.setItem('refresh_token', res.data.refresh_token);
       localStorage.setItem('user_email',    email);
+      toast.success("Bienvenido de vuelta");
       navigate('/dashboard');
     } catch (err) {
       const d = err.response?.data?.detail;
-      setError(typeof d === 'string' ? d : Array.isArray(d) ? d.map(x => x.msg).join(', ') : 'Error de conexión con el servidor');
+      const errorMsg = typeof d === 'string' ? d : Array.isArray(d) ? d.map(x => x.msg).join(', ') : 'Error de conexión con el servidor';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page">
-      {/* Orbs de fondo */}
-      <div className="login-orb login-orb-1" />
-      <div className="login-orb login-orb-2" />
-      <div className="login-orb login-orb-3" />
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden p-6">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primaryLight rounded-full blur-[100px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-primaryLight rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="login-card">
+      {/* Main Card */}
+      <div className="bg-surface/80 backdrop-blur-2xl border border-white/5 rounded-[24px] shadow-glow p-8 sm:p-10 w-full max-w-[420px] relative z-10 animate-fade-in-up">
+        
         {/* Logo */}
-        <div className="login-logo-wrap">
-          <div className="login-logo-glow" />
-          <div className="login-logo">🔒</div>
+        <div className="flex justify-center mb-8 relative">
+          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+          <div className="bg-gradient-to-br from-primary to-primaryHover p-3 rounded-2xl shadow-lg relative">
+            <ShieldCheck className="w-10 h-10 text-white" strokeWidth={2} />
+          </div>
         </div>
 
         {/* Header */}
-        <div className="login-header">
-          <h1>SevWork</h1>
-          <p>Tu espacio de trabajo privado y seguro</p>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-textMain to-textMuted mb-2">
+            SevWork
+          </h1>
+          <p className="text-sm text-textMuted font-medium">
+            Tu espacio de trabajo privado y seguro
+          </p>
         </div>
 
-        {/* Tabs login/register */}
-        <div className="login-tabs">
+        {/* Tabs */}
+        <div className="flex bg-black/40 p-1 rounded-xl mb-8 border border-white/5">
           <button
-            className={`login-tab ${!isRegister ? 'active' : ''}`}
-            onClick={() => { setIsRegister(false); setError(''); }}
             type="button"
-          >Iniciar sesión</button>
+            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${!isRegister ? 'bg-primary text-white shadow-md' : 'text-textMuted hover:text-textMain'}`}
+            onClick={() => setIsRegister(false)}
+          >
+            Iniciar sesión
+          </button>
           <button
-            className={`login-tab ${isRegister ? 'active' : ''}`}
-            onClick={() => { setIsRegister(true); setError(''); }}
             type="button"
-          >Crear cuenta</button>
+            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${isRegister ? 'bg-primary text-white shadow-md' : 'text-textMuted hover:text-textMain'}`}
+            onClick={() => setIsRegister(true)}
+          >
+            Crear cuenta
+          </button>
         </div>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="login-form" noValidate>
-          <div className="login-field">
-            <label htmlFor="email">Correo electrónico</label>
-            <div className="login-input-wrap">
-              <span className="login-input-icon">✉</span>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-textMuted uppercase tracking-wider pl-1">
+              Correo Electrónico
+            </label>
+            <div className="relative flex items-center bg-black/30 border border-border rounded-xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all overflow-hidden">
+              <Mail className="absolute left-3 w-4 h-4 text-textMuted" />
               <input
-                id="email"
                 type="email"
+                required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="tu@email.com"
-                required
-                autoComplete="email"
-                className="login-input"
+                className="w-full bg-transparent border-none text-textMain text-sm pl-10 pr-4 py-3 outline-none"
               />
             </div>
           </div>
 
-          <div className="login-field">
-            <label htmlFor="password">Contraseña</label>
-            <div className="login-input-wrap">
-              <span className="login-input-icon">🔑</span>
+          <div className="space-y-1.5 pb-2">
+            <label className="text-xs font-bold text-textMuted uppercase tracking-wider pl-1">
+              Contraseña
+            </label>
+            <div className="relative flex items-center bg-black/30 border border-border rounded-xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all overflow-hidden">
+              <Lock className="absolute left-3 w-4 h-4 text-textMuted" />
               <input
-                id="password"
                 type={showPass ? 'text' : 'password'}
+                required
+                minLength={8}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder={isRegister ? 'Mínimo 8 caracteres' : '••••••••'}
-                required
-                minLength={8}
-                autoComplete={isRegister ? 'new-password' : 'current-password'}
-                className="login-input"
+                className="w-full bg-transparent border-none text-textMain text-sm pl-10 pr-10 py-3 outline-none"
               />
               <button
                 type="button"
-                className="login-eye-btn"
-                onClick={() => setShowPass(v => !v)}
-                tabIndex={-1}
-                title={showPass ? 'Ocultar' : 'Ver contraseña'}
+                className="absolute right-3 text-textMuted hover:text-primary transition-colors"
+                onClick={() => setShowPass(!showPass)}
               >
-                {showPass ? '🙈' : '👁️'}
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {error && (
-            <div className="login-error">
-              <span>⚠️</span> {error}
-            </div>
-          )}
-
-          <button type="submit" className="login-btn" disabled={loading}>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-primary hover:bg-primaryHover text-white font-bold py-3.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_14px_0_rgba(59,130,246,0.39)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.23)] flex justify-center items-center gap-2"
+          >
             {loading ? (
-              <span className="login-btn-loading">
-                <span className="login-spinner" />
-                {isRegister ? 'Creando cuenta...' : 'Iniciando sesión...'}
-              </span>
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>{isRegister ? 'Creando cuenta...' : 'Autenticando...'}</span>
+              </>
             ) : (
-              isRegister ? '🚀 Crear cuenta' : '→ Iniciar sesión'
+              <span>{isRegister ? 'Crear cuenta segura' : 'Entrar al Workspace'}</span>
             )}
           </button>
         </form>
 
-        <p className="login-hint">
-          {isRegister ? '¿Ya tienes cuenta? ' : '¿Nuevo aquí? '}
-          <button
-            className="login-switch-btn"
+        <p className="text-center text-sm text-textMuted mt-6 mb-6">
+          {isRegister ? '¿Ya estás a bordo? ' : '¿Nuevo en la tripulación? '}
+          <button 
             type="button"
-            onClick={() => { setIsRegister(v => !v); setError(''); }}
+            className="text-primary hover:text-primaryHover font-medium underline underline-offset-4 decoration-primary/30 transition-colors"
+            onClick={() => setIsRegister(!isRegister)}
           >
-            {isRegister ? 'Inicia sesión' : 'Regístrate gratis'}
+            {isRegister ? 'Inicia sesión' : 'Regístrate aquí'}
           </button>
         </p>
 
-        <div className="login-badges">
-          <span>🔐 JWT</span>
-          <span>🛡️ Cifrado</span>
-          <span>🔒 Seguro</span>
+        {/* Security Badges */}
+        <div className="flex justify-center items-center gap-4 pt-5 border-t border-white/5">
+          <div className="flex items-center gap-1.5 text-xs text-textMuted font-medium">
+            <Key className="w-3.5 h-3.5" /> JWT Auth
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-textMuted font-medium">
+            <ShieldAlert className="w-3.5 h-3.5" /> Cifrado
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-textMuted font-medium">
+            <Cpu className="w-3.5 h-3.5" /> DevSecOps
+          </div>
         </div>
+
       </div>
     </div>
   );

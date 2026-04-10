@@ -30,6 +30,7 @@ def list_notes(
     workspace_id: Optional[int] = None,
     search: Optional[str] = Query(None, max_length=255),
     tag: Optional[str] = Query(None, max_length=50),
+    is_trash: bool = Query(False),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -37,7 +38,7 @@ def list_notes(
     Filtra por workspace_id, búsqueda de texto y etiqueta.
     Protección IDOR: solo retorna notas donde user_id == current_user.id.
     """
-    query = db.query(Note).filter(Note.user_id == current_user.id)
+    query = db.query(Note).filter(Note.user_id == current_user.id, Note.is_deleted == is_trash)
     if workspace_id:
         query = query.filter(Note.workspace_id == workspace_id)
     if search:
@@ -113,6 +114,8 @@ def update_note(
         note.tag = note_data.tag
     if note_data.is_pinned is not None:
         note.is_pinned = note_data.is_pinned
+    if note_data.is_deleted is not None:
+        note.is_deleted = note_data.is_deleted
 
     import datetime
     note.updated_at = datetime.datetime.utcnow()

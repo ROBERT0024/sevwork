@@ -22,23 +22,24 @@ export const login    = (email, password) => api.post('/auth/login',    { email,
 export const getWorkspaces   = ()                => api.get('/workspaces/');
 export const createWorkspace = (name, desc = '') => api.post('/workspaces/', { name, description: desc });
 export const deleteWorkspace = (id)              => api.delete(`/workspaces/${id}`);
-export const getNotes = (wsId = null, search = '', tag = '') => {
+export const getNotes = (wsId = null, search = '', tag = '', trash = false) => {
   const p = {};
   if (wsId)   p.workspace_id = wsId;
   if (search) p.search = search;
   if (tag)    p.tag    = tag;
+  p.is_trash = trash;
   return api.get('/notes/', { params: p });
 };
 export const createNote = (title, content, wsId, tag = '', note_type = 'note', is_pinned = false) =>
   api.post('/notes/', { title, content, workspace_id: wsId, tag, note_type, is_pinned });
 export const updateNote = (id, data) => api.put(`/notes/${id}`, data);
 export const deleteNote = (id)       => api.delete(`/notes/${id}`);
-export const getTasks = (wsId = null) => {
-  const p = wsId ? { workspace_id: wsId } : {};
+export const getTasks = (wsId = null, trash = false) => {
+  const p = wsId ? { workspace_id: wsId, is_trash: trash } : { is_trash: trash };
   return api.get('/tasks/', { params: p });
 };
-export const createTask = (title, wsId, priority = 'medium', due_date = null) =>
-  api.post('/tasks/', { title, workspace_id: wsId, priority, due_date });
+export const createTask = (title, wsId, priority = 'medium', due_date = null, desc = '') =>
+  api.post('/tasks/', { title, workspace_id: wsId, priority, due_date, description: desc });
 export const updateTask = (id, data) => api.patch(`/tasks/${id}`, data);
 export const deleteTask = (id)       => api.delete(`/tasks/${id}`);
 export default api;

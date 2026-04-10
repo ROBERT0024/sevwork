@@ -31,5 +31,5 @@ USER appuser
 # Puerto de la aplicación
 EXPOSE 8000
 
-# Comando de inicio
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Ejecutar migraciones automáticas y luego iniciar la aplicación
+CMD ["sh", "-c", "alembic upgrade head || true ; uvicorn app.main:app --host 0.0.0.0 --port 8000"]

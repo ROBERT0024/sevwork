@@ -10,11 +10,9 @@ import TasksView     from './views/TasksView.jsx';
 import CalendarView  from './views/CalendarView.jsx';
 import FavoritesView from './views/FavoritesView.jsx';
 import SharedView    from './views/SharedView.jsx';
+import TrashView     from './views/TrashView.jsx';
 import { getWorkspaces, createWorkspace } from './services/api.js';
 
-function TrashView() {
-  return <div className="view-empty" style={{paddingTop:80}}><span>🗑</span><p>La papelera está vacía.</p></div>;
-}
 
 function MainLayout() {
   const [view, setView]           = useState('home');
@@ -58,17 +56,19 @@ function MainLayout() {
   const activeView = openNote ? 'editor' : view;
 
   return (
-    <div className="app-shell">
+    <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30">
       <Sidebar activeView={activeView} onNavigate={handleNavigate}
         workspaces={workspaces} activeWorkspace={activeWs}
         onWorkspaceChange={setActiveWs} onCreateWorkspace={handleCreateWorkspace}
         userEmail={userEmail} />
-      <div className="app-main">
+      
+      <div className="flex flex-col flex-1 overflow-hidden bg-background">
         <TopBar activeView={activeView} onSearchOpen={() => setShowSearch(true)}
           onNewNote={() => { setView('notes'); setTriggerNewNote(true); }}
           onNewTask={() => { setView('tasks'); setTriggerNewTask(true); }}
           noteTitle={openNote?.title} />
-        <div className="app-content">
+        
+        <main className="flex-1 overflow-y-auto w-full relative">
           {activeView === 'home'     && <HomeView onNavigate={handleNavigate} onOpenNote={handleOpenNote} activeWorkspace={activeWs} />}
           {activeView === 'notes'    && <NotesView onOpenNote={handleOpenNote} activeWorkspace={activeWs} showNewForm={triggerNewNote} onFormShown={() => setTriggerNewNote(false)} />}
           {activeView === 'editor'   && openNote && <NoteEditorView note={openNote} onBack={handleBackEditor} />}
@@ -76,9 +76,10 @@ function MainLayout() {
           {activeView === 'calendar' && <CalendarView activeWorkspace={activeWs} />}
           {activeView === 'favorites'&& <FavoritesView activeWorkspace={activeWs} onOpenNote={handleOpenNote} />}
           {activeView === 'shared'   && <SharedView />}
-          {activeView === 'trash'    && <TrashView />}
-        </div>
+          {activeView === 'trash'    && <TrashView activeWorkspace={activeWs} />}
+        </main>
       </div>
+      
       {showSearch && <SearchModal onClose={() => setShowSearch(false)}
         onOpenNote={(n) => { handleOpenNote(n); setShowSearch(false); }}
         onNavigate={(v) => { handleNavigate(v); setShowSearch(false); }} />}

@@ -76,6 +76,7 @@ class NoteUpdate(BaseModel):
     content: Optional[str] = Field(None, max_length=50000)
     tag: Optional[str] = Field(None, max_length=50)
     is_pinned: Optional[bool] = None
+    is_deleted: Optional[bool] = None
 
 
 class NoteResponse(BaseModel):
@@ -89,6 +90,7 @@ class NoteResponse(BaseModel):
     tag: str
     note_type: str
     is_pinned: bool
+    is_deleted: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -101,26 +103,34 @@ class NoteResponse(BaseModel):
 class TaskCreate(BaseModel):
     """Esquema para crear una tarea."""
     title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(default="", max_length=50000)
     workspace_id: int
     priority: str = Field(default="medium", pattern="^(low|medium|high)$")
     due_date: Optional[datetime] = None
+    is_pinned: bool = False
 
 
 class TaskUpdate(BaseModel):
     """Esquema para actualizar una tarea."""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=50000)
     completed: Optional[bool] = None
     priority: Optional[str] = Field(None, pattern="^(low|medium|high)$")
     due_date: Optional[datetime] = None
+    is_deleted: Optional[bool] = None
+    is_pinned: Optional[bool] = None
 
 
 class TaskResponse(BaseModel):
     """Respuesta de una tarea."""
     id: int
     title: str
+    description: Optional[str] = None
     completed: bool
     priority: str
     due_date: Optional[datetime]
+    is_deleted: bool = False
+    is_pinned: bool = False
     workspace_id: int
     user_id: int
     created_at: datetime
