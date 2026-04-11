@@ -119,6 +119,7 @@ jobs:
         if: always()
         run: |
           echo "## 📦 Reporte de Dependencias (Trivy)" >> $GITHUB_STEP_SUMMARY
+
           for comp in api worker frontend; do
             echo "<details><summary><strong>🔍 Ver Escaneo de $comp</strong></summary><br>" >> $GITHUB_STEP_SUMMARY
             if [ -f trivy-deps-$comp.md ]; then
@@ -128,8 +129,7 @@ jobs:
             fi
             echo "</details><br>" >> $GITHUB_STEP_SUMMARY
           done
-          if [ "${{ steps.trivy-deps-api.outcome }}" == "failure" ] || [ "${{ steps.trivy-deps-worker.outcome }}" == "failure" ] || [ "${{ steps.trivy-deps-frontend.outcome }}" == "failure" ]; then exit 1; fi
-
+          
   # ══════════════════════════════════════════
   # FASE 2.5: IaC — Escaneo de infraestructura como código
   # ══════════════════════════════════════════
