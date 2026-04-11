@@ -1,7 +1,8 @@
 // CalendarView.jsx
 import React, { useState, useEffect } from 'react';
-import { getTasks } from '../services/api.js';
-import { ChevronLeft, ChevronRight, CheckCircle2, Circle, X, Calendar as CalendarIcon, AlignLeft } from 'lucide-react';
+import { getTasks, createTask } from '../services/api.js';
+import { ChevronLeft, ChevronRight, CheckCircle2, Circle, X, Calendar as CalendarIcon, AlignLeft, Plus, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { isHolidayOrWeekend } from '../utils/holidays.js';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -17,15 +18,47 @@ function CalendarView({ activeWorkspace }) {
   const [tasks, setTasks]   = useState([]);
   const [selected, setSelected] = useState(null);
   
+  // Quick Task Form States
+  const [showQuickForm, setShowQuickForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newPriority, setNewPriority] = useState('medium');
+  const [newComments, setNewComments] = useState('');
+  const [saving, setSaving] = useState(false);
+
   // Para la vista week/day, usamos 'currentDate' central
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const isOverdue = (t) => t.due_date && !t.completed && new Date(t.due_date) < new Date();
 
-  useEffect(() => {
+  const loadTasks = React.useCallback(() => {
     if (!activeWorkspace) return;
     getTasks(activeWorkspace).then(r => setTasks(r.data)).catch(() => {});
   }, [activeWorkspace]);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
+
+  const handleQuickCreate = async (e) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !selected) return;
+    
+    setSaving(true);
+    const dateStr = `${selected.year}-${String(selected.month + 1).padStart(2, '0')}-${String(selected.day).padStart(2, '0')}`;
+    
+    try {
+      await createTask(newTitle, activeWorkspace, newPriority, dateStr, '', newComments);
+      toast.success('Tarea agendada');
+      setNewTitle('');
+      setNewComments('');
+      setShowQuickForm(false);
+      loadTasks();
+    } catch {
+      toast.error('Error al crear tarea');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const prev = () => {
     if (viewMode === 'month') {
@@ -226,13 +259,59 @@ function CalendarView({ activeWorkspace }) {
             <div>
               <div className="flex items-center gap-3 flex-wrap mb-1">
                 <h3 className="text-xl font-bold text-textMain">{selected.day} de {MONTHS[selected.month]} {selected.year}</h3>
+                <button 
+                  onClick={() => setShowQuickForm(!showQuickForm)}
+                  className={`p-1.5 rounded-lg transition-all ${showQuickForm ? 'bg-primary text-white shadow-glow' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                  title="Nueva tarea para este día"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
                 {selected.holidayName && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 font-bold rounded-lg">{selected.holidayName}</span>}
                 {selected.isOff && !selected.holidayName && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 font-bold rounded-lg">Fin de Semana</span>}
               </div>
               <p className="text-xs text-textMuted font-medium">Detalle de tareas agendadas</p>
             </div>
-            <button className="p-2 bg-black/20 hover:bg-black/40 text-textMuted hover:text-white rounded-lg transition-colors border border-white/5" onClick={() => setSelected(null)}><X className="w-5 h-5" /></button>
+            <button className="p-2 bg-black/20 hover:bg-black/40 text-textMuted hover:text-white rounded-lg transition-colors border border-white/5" onClick={() => { setSelected(null); setShowQuickForm(false); }}><X className="w-5 h-5" /></button>
           </div>
+
+          {/* Quick Task Form */}
+          {showQuickForm && (
+            <form onSubmit={handleQuickCreate} className="mb-8 p-4 bg-primary/5 border border-primary/20 rounded-xl animate-fade-in-up">
+              <input 
+                autoFocus
+                placeholder="¿Qué tarea agendarás?"
+                className="w-full bg-transparent border-none text-sm font-bold text-textMain outline-none placeholder:text-textMuted"
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+              />
+              <textarea 
+                placeholder="Bitácora / Notas..."
+                className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-xs text-textMuted outline-none mt-3 resize-none h-[60px]"
+                value={newComments}
+                onChange={e => setNewComments(e.target.value)}
+              />
+              <div className="flex items-center justify-between mt-4">
+                <select 
+                  value={newPriority} 
+                  onChange={e => setNewPriority(e.target.value)}
+                  className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-bold text-textMain outline-none"
+                >
+                  <option value="high">Urgente</option>
+                  <option value="medium">Media</option>
+                  <option value="low">Baja</option>
+                </select>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setShowQuickForm(false)} className="text-[10px] font-bold text-textMuted hover:text-white px-2 py-1 uppercase transition-colors">Cancelar</button>
+                  <button 
+                    disabled={saving || !newTitle.trim()}
+                    className="bg-primary hover:bg-primaryHover text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-glow disabled:opacity-50"
+                  >
+                    {saving ? 'Guardando...' : <><Send className="w-3 h-3" /> Agendar</>}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
           
           <div className="flex-1 overflow-y-auto pr-2">
             {selected.tasks.length === 0 ? (
