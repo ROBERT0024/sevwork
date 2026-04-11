@@ -10,6 +10,11 @@ on:
 env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
   DOCKER_REPOSITORY: sevwork
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   code-security:
@@ -35,9 +40,18 @@ jobs:
       - name: "🐍 Bandit — Análisis de seguridad Python"
         run: |
           pip install bandit
+          echo "## 🐍 Reporte de Bandit (Python)" >> $GITHUB_STEP_SUMMARY
+          
+          bandit -r api-gateway/app/ -f custom --msg-template "*{line}* {test_id} - **{severity}**: {msg}" > bandit-api.txt || true
+          echo "### API Gateway" >> $GITHUB_STEP_SUMMARY
+          if [ -s bandit-api.txt ]; then echo '```text' >> $GITHUB_STEP_SUMMARY && cat bandit-api.txt >> $GITHUB_STEP_SUMMARY && echo '```' >> $GITHUB_STEP_SUMMARY; else echo "✅ Sin problemas críticos" >> $GITHUB_STEP_SUMMARY; fi
+          
+          bandit -r worker/ -f custom --msg-template "*{line}* {test_id} - **{severity}**: {msg}" > bandit-worker.txt || true
+          echo "### Worker" >> $GITHUB_STEP_SUMMARY
+          if [ -s bandit-worker.txt ]; then echo '```text' >> $GITHUB_STEP_SUMMARY && cat bandit-worker.txt >> $GITHUB_STEP_SUMMARY && echo '```' >> $GITHUB_STEP_SUMMARY; else echo "✅ Sin problemas críticos" >> $GITHUB_STEP_SUMMARY; fi
+          
+          # Mantener la compatibilidad para artifact subida si hace falta
           bandit -r api-gateway/app/ -f json -o bandit-report.json || true
-          bandit -r api-gateway/app/ -ll || true
-          bandit -r worker/ -ll || true
 
       - name: "🔎 Semgrep — Patrones de seguridad"
         uses: semgrep/semgrep-action@v1
@@ -69,8 +83,9 @@ jobs:
           scan-type: 'fs'
           scan-ref: './api-gateway'
           format: 'table'
+          output: 'trivy-deps-api.txt'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: "🔒 Trivy — Escaneo de dependencias Worker"
         uses: aquasecurity/trivy-action@master
@@ -78,8 +93,9 @@ jobs:
           scan-type: 'fs'
           scan-ref: './worker'
           format: 'table'
+          output: 'trivy-deps-worker.txt'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
 
       - name: "🔒 Trivy — Escaneo de dependencias Frontend"
         uses: aquasecurity/trivy-action@master
@@ -87,8 +103,25 @@ jobs:
           scan-type: 'fs'
           scan-ref: './frontend'
           format: 'table'
+          output: 'trivy-deps-frontend.txt'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
+
+      - name: "📊 Resumen de Trivy (Dependencias)"
+        if: always()
+        run: |
+          echo "## 📦 Reporte de Dependencias (Trivy)" >> $GITHUB_STEP_SUMMARY
+          for comp in api worker frontend; do
+            echo "### Componente: $comp" >> $GITHUB_STEP_SUMMARY
+            if [ -s trivy-deps-$comp.txt ]; then
+              echo '```text' >> $GITHUB_STEP_SUMMARY
+              cat trivy-deps-$comp.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Sin vulnerabilidades críticas o altas" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          if [ -s trivy-deps-api.txt ] || [ -s trivy-deps-worker.txt ] || [ -s trivy-deps-frontend.txt ]; then exit 1; fi
 
   # ══════════════════════════════════════════
   # FASE 2.5: IaC — Escaneo de infraestructura como código
@@ -106,13 +139,29 @@ jobs:
           python-version: '3.12'
 
       - name: "🔍 Checkov — Escaneo de Dockerfiles y Compose"
+        id: checkov-scan
         uses: bridgecrewio/checkov-action@v12
+        continue-on-error: true
         with:
           directory: .
           framework: dockerfile,yaml
           soft_fail: false
           skip_check: CKV_DOCKER_2,CKV_DOCKER_3,CKV2_DOCKER_1
           output_format: cli
+          output_file_path: console,checkov-report.txt
+
+      - name: "📊 Resumen de Checkov (IaC)"
+        if: always()
+        run: |
+          echo "## 🏗️ Reporte de Infraestructura (Checkov)" >> $GITHUB_STEP_SUMMARY
+          if ls checkov-report.txt* 1> /dev/null 2>&1; then
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            cat checkov-report.txt* | head -n 100 >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Validaciones correctas" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ steps.checkov-scan.outcome }}" == "failure" ]; then exit 1; fi
 
 
   build-and-scan:
@@ -137,8 +186,9 @@ jobs:
         with:
           image-ref: 'api-temp:${{ github.sha }}'
           format: 'table'
+          output: 'trivy-image-api.txt'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
 
       - name: "🔒 Trivy — Escaneo imagen Worker"
@@ -146,8 +196,9 @@ jobs:
         with:
           image-ref: 'worker-temp:${{ github.sha }}'
           format: 'table'
+          output: 'trivy-image-worker.txt'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
 
       - name: "🔒 Trivy — Escaneo imagen Frontend"
@@ -155,9 +206,26 @@ jobs:
         with:
           image-ref: 'frontend-temp:${{ github.sha }}'
           format: 'table'
+          output: 'trivy-image-frontend.txt'
           severity: 'CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
+
+      - name: "📊 Resumen de Trivy (Imágenes Docker)"
+        if: always()
+        run: |
+          echo "## 🐳 Reporte de Imágenes (Trivy)" >> $GITHUB_STEP_SUMMARY
+          for comp in api worker frontend; do
+            echo "### Imagen: $comp" >> $GITHUB_STEP_SUMMARY
+            if [ -s trivy-image-$comp.txt ]; then
+              echo '```text' >> $GITHUB_STEP_SUMMARY
+              cat trivy-image-$comp.txt >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Sin vulnerabilidades críticas detectadas" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          if [ -s trivy-image-api.txt ] || [ -s trivy-image-worker.txt ] || [ -s trivy-image-frontend.txt ]; then exit 1; fi
 
   test:
     name: "🧪 Pruebas Unitarias"
@@ -219,6 +287,17 @@ jobs:
           target: 'http://localhost:8000/openapi.json'
           fail_action: false
           cmd_options: '-a'
+          issue_title: ''
+
+      - name: "📊 Resumen de OWASP ZAP (DAST)"
+        if: always()
+        run: |
+          echo "## 🌐 Reporte de ZAP DAST" >> $GITHUB_STEP_SUMMARY
+          if [ -f report_md.md ]; then
+            cat report_md.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No se detectaron alertas o no se generó el reporte." >> $GITHUB_STEP_SUMMARY
+          fi
 
   push-dev-images:
     name: "📤 Push Dev Images — Docker Hub"
