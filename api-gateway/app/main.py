@@ -4,9 +4,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
 
 from app.database import engine, Base
 from app.routers import auth, workspaces, notes, tasks
@@ -21,8 +20,8 @@ app = FastAPI(
 )
 
 # Configurar SlowAPI (Rate Limiting)
-limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
+from slowapi import _rate_limit_exceeded_handler
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Manejador Global de Excepciones para estandarizar errores (basado en RFC 7807)
@@ -48,6 +47,8 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; object-src 'none';"
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     return response
 
 # Configuración de CORS

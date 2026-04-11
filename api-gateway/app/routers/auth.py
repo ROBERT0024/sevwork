@@ -8,12 +8,15 @@ from app.database import get_db
 from app.models import User
 from app.schemas import UserRegister, UserLogin, TokenResponse, UserResponse
 from app.deps import hash_password, verify_password, create_access_token, create_refresh_token
+from app.limiter import limiter
+from fastapi import Request
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def register(user_data: UserRegister, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
     """Registra un nuevo usuario.
     - Valida que el email no esté registrado.
     - Hashea la contraseña con bcrypt.
@@ -39,7 +42,8 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(user_data: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, user_data: UserLogin, db: Session = Depends(get_db)):
     """Inicia sesión y retorna tokens JWT (access + refresh).
     - Verifica email y contraseña.
     - Genera par de tokens con el ID del usuario.
