@@ -1,7 +1,9 @@
 // HomeView.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { getNotes, getTasks } from '../services/api.js';
-import { FileText, CheckCircle2, Star, Clock, Plus, Users, CalendarDays, Pin, ArrowRight, Flame, TrendingUp, PieChart as PieIcon } from 'lucide-react';
+import { FileText, CheckCircle2, Star, Clock, Plus, Users, CalendarDays, Pin, ArrowRight, Flame, TrendingUp, PieChart as PieIcon, Download } from 'lucide-react';
+import { generateManagerialReport } from '../utils/ReportGenerator.js';
+import toast from 'react-hot-toast';
 import { getTagClasses, tagBadgeClass, getTagStyle } from '../utils/tagColors.js';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 
@@ -75,6 +77,17 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
     })).sort((a, b) => b.value - a.value);
   }, [notes]);
 
+  const handleDownloadReport = async () => {
+    const userEmail = localStorage.getItem('user_email') || 'usuario@workspace';
+    const reportToast = toast.loading('Generando informe gerencial...');
+    try {
+      await generateManagerialReport({ notes, tasks, progress, userEmail, tagData });
+      toast.success('Informe generado con éxito', { id: reportToast });
+    } catch (error) {
+      toast.error('Error al generar el informe', { id: reportToast });
+    }
+  };
+
   return (
     <div className="p-8 sm:p-12 max-w-6xl mx-auto animate-fade-in-up">
       
@@ -85,16 +98,26 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
           <p className="text-textMuted text-sm font-medium">Tu espacio de trabajo seguro y organizado.</p>
         </div>
         
-        {/* Streak Badge */}
-        {streak > 0 && (
-          <div className="flex items-center gap-3 bg-orange-500/10 border border-orange-500/20 px-4 py-2 rounded-2xl animate-pulse">
-            <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
-            <div>
-              <p className="text-xs font-bold text-orange-500 uppercase tracking-widest leading-none mb-0.5">Racha Actual</p>
-              <p className="text-xl font-black text-orange-400 leading-none">{streak} días</p>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <button 
+            onClick={handleDownloadReport}
+            className="flex items-center gap-2 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white text-xs font-bold px-5 py-3 rounded-2xl transition-all shadow-lg active:scale-95 group"
+          >
+            <Download className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+            Descargar Informe Gerencial
+          </button>
+
+          {/* Streak Badge */}
+          {streak > 0 && (
+            <div className="flex items-center gap-3 bg-orange-500/10 border border-orange-500/20 px-4 py-2 rounded-2xl animate-pulse">
+              <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+              <div>
+                <p className="text-xs font-bold text-orange-500 uppercase tracking-widest leading-none mb-0.5">Racha Actual</p>
+                <p className="text-xl font-black text-orange-400 leading-none">{streak} días</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
