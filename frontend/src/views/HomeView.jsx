@@ -180,18 +180,18 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
                   </Pie>
                   <Tooltip 
                     contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}
-                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)' }}
+                    itemStyle={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-main)' }}
                     labelStyle={{ color: 'var(--text-muted)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="w-40 space-y-2">
+            <div className="w-44 space-y-3">
               {tagData.slice(0, 5).map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: t.color }} />
-                  <span className="text-[10px] font-bold text-textMain capitalize truncate">{t.name}</span>
-                  <span className="text-[10px] text-textMuted ml-auto">{t.value}</span>
+                <div key={i} className="flex items-center gap-2.5">
+                  <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: t.color }} />
+                  <span className="text-xs font-bold text-textMain capitalize truncate">{t.name}</span>
+                  <span className="text-xs font-medium text-textMuted ml-auto">{t.value}</span>
                 </div>
               ))}
             </div>
