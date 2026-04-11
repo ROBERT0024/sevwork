@@ -34,8 +34,10 @@ export const createNote = (title, content, wsId, tag = '', note_type = 'note', i
   api.post('/notes/', { title, content, workspace_id: wsId, tag, note_type, is_pinned });
 export const updateNote = (id, data) => api.put(`/notes/${id}`, data);
 export const deleteNote = (id)       => api.delete(`/notes/${id}`);
-export const getTasks = (wsId = null, trash = false) => {
-  const p = wsId ? { workspace_id: wsId, is_trash: trash } : { is_trash: trash };
+export const getTasks = (wsId = null, search = '', trash = false) => {
+  const p = { is_trash: trash };
+  if (wsId)   p.workspace_id = wsId;
+  if (search) p.search = search;
   return api.get('/tasks/', { params: p });
 };
 export const createTask = (title, wsId, priority = 'medium', due_date = null, desc = '', comments = '') =>

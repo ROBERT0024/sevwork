@@ -31,12 +31,13 @@ function SearchModal({ onClose, onOpenNote, onNavigate, activeWorkspace }) {
     const t = setTimeout(async () => {
       setLoading(true);
       try {
+        // Realizamos búsqueda global (independiente del workspace actual)
         const [nr, tr] = await Promise.all([
-          getNotes(activeWorkspace, query),
-          getTasks(activeWorkspace),
+          getNotes(null, query),
+          getTasks(null, query),
         ]);
         setNotes(nr.data.slice(0, 5));
-        setTasks(tr.data.filter(t => t.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+        setTasks(tr.data.slice(0, 5));
         setSelected(0);
       } catch { /* ignore */ }
       setLoading(false);

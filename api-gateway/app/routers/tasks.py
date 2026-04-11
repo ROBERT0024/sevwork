@@ -2,7 +2,7 @@
 # Endpoints: listar, crear, actualizar (completar/descompletar) y eliminar tareas
 # Protegidos por JWT, con IDOR protection
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -17,16 +17,25 @@ router = APIRouter(prefix="/tasks", tags=["Tareas"])
 @router.get("/", response_model=List[TaskResponse])
 def list_tasks(
     workspace_id: Optional[int] = None,
+    search: Optional[str] = Query(None, max_length=255),
     is_trash: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Lista las tareas del usuario autenticado.
+    Filtra por workspace_id y búsqueda de texto.
     Protección IDOR: solo retorna tareas donde user_id == current_user.id.
     """
     query = db.query(Task).filter(Task.user_id == current_user.id, Task.is_deleted == is_trash)
     if workspace_id:
         query = query.filter(Task.workspace_id == workspace_id)
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            Task.title.ilike(search_term) | 
+            Task.description.ilike(search_term) |
+            Task.comments.ilike(search_term)
+        )
     return query.order_by(Task.completed.asc(), Task.created_at.desc()).all()
 
 
