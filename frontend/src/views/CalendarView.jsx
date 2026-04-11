@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTasks } from '../services/api.js';
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle, X, Calendar as CalendarIcon, AlignLeft } from 'lucide-react';
+import { isHolidayOrWeekend } from '../utils/holidays.js';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -94,11 +95,14 @@ function CalendarView({ activeWorkspace }) {
 
     if (viewMode === 'day') {
       const dayTasks = getTasksForDate(currentDate);
+      const { isOff, holidayName } = isHolidayOrWeekend(currentDate);
       return (
-        <div className="col-span-7 bg-surface p-6 rounded-xl border border-border min-h-[400px]">
-           <h3 className="text-2xl font-bold text-textMain mb-6 flex items-center gap-3">
+        <div className={`col-span-7 p-6 rounded-xl border border-border min-h-[400px] ${isOff ? 'bg-red-500/5' : 'bg-surface'}`}>
+           <h3 className="text-2xl font-bold text-textMain mb-6 flex items-center gap-3 flex-wrap">
              <CalendarIcon className="w-8 h-8 text-primary" />
              {currentDate.getDate()} de {MONTHS[currentDate.getMonth()]} del {currentDate.getFullYear()}
+             {holidayName && <span className="text-sm px-3 py-1 bg-red-500/20 text-red-500 font-bold rounded-full">{holidayName}</span>}
+             {isOff && !holidayName && <span className="text-sm px-3 py-1 bg-red-500/20 text-red-500 font-bold rounded-full">Fin de Semana</span>}
            </h3>
            {dayTasks.length === 0 ? (
              <div className="text-textMuted flex flex-col items-center justify-center p-10 opacity-70">
@@ -128,20 +132,24 @@ function CalendarView({ activeWorkspace }) {
     return cellsToRender.map((dateObj, i) => {
       const dayTasks = getTasksForDate(dateObj);
       const dayNum = dateObj ? dateObj.getDate() : null;
+      const { isOff, holidayName, isWeekend } = isHolidayOrWeekend(dateObj);
       const isSelected = selected && dateObj && selected.day === dayNum && selected.month === dateObj.getMonth();
       const todayMark = isTodayDate(dateObj);
 
       return (
         <div 
           key={i}
-          className={`bg-surface p-2 transition-all relative border-t border-l border-border/50 ${viewMode==='week' ? 'min-h-[300px]' : 'min-h-[120px]'} ${!dateObj ? 'bg-background/20 opacity-50' : 'hover:bg-surfaceHover cursor-pointer'} ${isSelected ? 'ring-2 ring-inset ring-primary' : ''}`}
-          onClick={() => dateObj && setSelected({ day: dayNum, month: dateObj.getMonth(), year: dateObj.getFullYear(), tasks: dayTasks })}
+          className={`p-2 transition-all relative border-t border-l border-border/50 ${viewMode==='week' ? 'min-h-[300px]' : 'min-h-[120px]'} ${!dateObj ? 'bg-background/20 opacity-50' : isOff ? 'bg-red-500/5 hover:bg-red-500/10 cursor-pointer' : 'bg-surface hover:bg-surfaceHover cursor-pointer'} ${isSelected ? 'ring-2 ring-inset ring-primary' : ''}`}
+          onClick={() => dateObj && setSelected({ day: dayNum, month: dateObj.getMonth(), year: dateObj.getFullYear(), tasks: dayTasks, holidayName, isOff })}
         >
           {dateObj && (
             <>
-              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold mb-2 ${todayMark ? 'bg-primary text-white shadow-glow' : 'text-textMuted'}`}>
-                {dayNum} {viewMode === 'week' && <span className="ml-1 text-[10px] font-normal sm:hidden">{DAYS[dateObj.getDay()]}</span>}
-              </span>
+              <div className="flex justify-between items-start mb-2">
+                <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${todayMark ? 'bg-primary text-white shadow-glow' : isOff ? 'text-red-400' : 'text-textMuted'}`}>
+                  {dayNum} {viewMode === 'week' && <span className="ml-1 text-[10px] font-normal sm:hidden">{DAYS[dateObj.getDay()]}</span>}
+                </span>
+                {holidayName && <span className="text-[9px] text-red-500 font-bold bg-red-400/10 px-1.5 py-0.5 rounded truncate max-w-[70%] text-right">{holidayName}</span>}
+              </div>
               
               {dayTasks.length > 0 && (
                 <div className="flex flex-col gap-1 mt-1">
@@ -207,10 +215,14 @@ function CalendarView({ activeWorkspace }) {
       {/* Side Panel for Selected Day */}
       {selected && (
         <div className="fixed top-0 right-0 h-full w-[360px] md:w-[420px] bg-surface/95 backdrop-blur-3xl border-l border-white/10 shadow-2xl p-6 z-50 flex flex-col transform translate-x-0 transition-transform duration-300">
-          <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+          <div className="flex justify-between items-start mb-8 border-b border-white/5 pb-4">
             <div>
-              <h3 className="text-xl font-bold text-textMain">{selected.day} de {MONTHS[selected.month]} {selected.year}</h3>
-              <p className="text-xs text-textMuted font-medium mt-1">Detalle de tareas agendadas</p>
+              <div className="flex items-center gap-3 flex-wrap mb-1">
+                <h3 className="text-xl font-bold text-textMain">{selected.day} de {MONTHS[selected.month]} {selected.year}</h3>
+                {selected.holidayName && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 font-bold rounded-lg">{selected.holidayName}</span>}
+                {selected.isOff && !selected.holidayName && <span className="text-xs px-2 py-1 bg-red-500/20 text-red-500 font-bold rounded-lg">Fin de Semana</span>}
+              </div>
+              <p className="text-xs text-textMuted font-medium">Detalle de tareas agendadas</p>
             </div>
             <button className="p-2 bg-black/20 hover:bg-black/40 text-textMuted hover:text-white rounded-lg transition-colors border border-white/5" onClick={() => setSelected(null)}><X className="w-5 h-5" /></button>
           </div>
