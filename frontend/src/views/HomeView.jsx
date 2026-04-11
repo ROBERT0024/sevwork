@@ -138,10 +138,17 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                  itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                  contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                  itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)' }}
+                  labelStyle={{ color: 'var(--text-muted)' }}
+                  cursor={{ fill: 'transparent' }}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={40}>
+                <Bar 
+                  dataKey="value" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={40}
+                  activeBar={{ fill: 'var(--text-main)', filter: 'drop-shadow(0 0 8px var(--primary))' }}
+                >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -172,8 +179,9 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                    itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-main)' }}
+                    labelStyle={{ color: 'var(--text-muted)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
