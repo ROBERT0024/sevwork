@@ -20,6 +20,8 @@ function CalendarView({ activeWorkspace }) {
   // Para la vista week/day, usamos 'currentDate' central
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const isOverdue = (t) => t.due_date && !t.completed && new Date(t.due_date) < new Date();
+
   useEffect(() => {
     if (!activeWorkspace) return;
     getTasks(activeWorkspace).then(r => setTasks(r.data)).catch(() => {});
@@ -118,7 +120,10 @@ function CalendarView({ activeWorkspace }) {
                       {t.completed ? <CheckCircle2 className="w-5 h-5 text-success shrink-0" /> : <Circle className={`w-5 h-5 shrink-0 ${PRIORITY_TEXT[t.priority] || 'text-textMuted'}`} />}
                     </div>
                     <div className="flex-1">
-                      <span className={`text-base font-bold ${t.completed ? 'text-textMuted line-through' : 'text-textMain'}`}>{t.title}</span>
+                      <span className={`text-base font-bold ${t.completed ? 'text-textMuted line-through' : 'text-textMain'}`}>
+                        {t.title}
+                        {isOverdue(t) && <span className="text-danger ml-2">(Atrasada)</span>}
+                      </span>
                       {t.description && <p className="text-sm text-textMuted mt-1">{t.description}</p>}
                     </div>
                   </div>
@@ -154,9 +159,11 @@ function CalendarView({ activeWorkspace }) {
               {dayTasks.length > 0 && (
                 <div className="flex flex-col gap-1 mt-1">
                   {dayTasks.slice(0, viewMode === 'week' ? 6 : 3).map((t, idx) => (
-                    <div key={idx} className="flex items-center gap-1.5 px-1.5 py-1 rounded bg-black/20 truncate group/task">
+                    <div key={idx} className={`flex items-center gap-1.5 px-1.5 py-1 rounded bg-black/20 truncate group/task ${isOverdue(t) ? 'border border-danger/30' : ''}`}>
                       <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_COLOR[t.priority] || 'bg-primary'}`} />
-                      <span className={`text-[10px] font-medium truncate ${t.completed ? 'line-through text-textMuted' : 'text-textMain'}`}>{t.title}</span>
+                      <span className={`text-[10px] font-medium truncate ${t.completed ? 'line-through text-textMuted' : isOverdue(t) ? 'text-danger' : 'text-textMain'}`}>
+                        {t.title}
+                      </span>
                     </div>
                   ))}
                   {dayTasks.length > (viewMode === 'week' ? 6 : 3) && (
@@ -242,8 +249,16 @@ function CalendarView({ activeWorkspace }) {
                       {t.completed ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" /> : <Circle className={`w-4 h-4 shrink-0 ${PRIORITY_TEXT[t.priority] || 'text-textMuted'}`} />}
                     </div>
                     <div className="flex-1 flex flex-col">
-                      <span className={`text-sm tracking-wide font-bold mb-1 ${t.completed ? 'text-textMuted line-through' : 'text-textMain'}`}>{t.title}</span>
+                      <span className={`text-sm tracking-wide font-bold mb-1 ${t.completed ? 'text-textMuted line-through' : 'text-textMain'}`}>
+                        {t.title}
+                        {isOverdue(t) && <span className="text-danger ml-2 font-bold">(Atrasada)</span>}
+                      </span>
                       {t.description && <span className="text-xs text-textMuted flex items-start gap-1"><AlignLeft className="w-3 h-3 mt-0.5 shrink-0" /> {t.description}</span>}
+                      {t.comments && (
+                        <div className="mt-2 p-2 bg-primary/10 border-l border-primary rounded text-[10px] text-textMain italic">
+                          <span className="font-bold not-italic">Bitácora:</span> {t.comments}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

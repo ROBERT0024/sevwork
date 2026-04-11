@@ -107,7 +107,8 @@ class TaskCreate(BaseModel):
     workspace_id: int
     priority: str = Field(default="medium", pattern="^(low|medium|high)$")
     due_date: Optional[datetime] = None
-    is_pinned: bool = False
+    is_pinned: bool = Field(default=False)
+    comments: Optional[str] = Field(default="", max_length=1000)
 
 
 class TaskUpdate(BaseModel):
@@ -119,6 +120,7 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
     is_deleted: Optional[bool] = None
     is_pinned: Optional[bool] = None
+    comments: Optional[str] = None
 
 
 class TaskResponse(BaseModel):
@@ -131,6 +133,7 @@ class TaskResponse(BaseModel):
     due_date: Optional[datetime]
     is_deleted: bool = False
     is_pinned: bool = False
+    comments: Optional[str] = ""
     workspace_id: int
     user_id: int
     created_at: datetime

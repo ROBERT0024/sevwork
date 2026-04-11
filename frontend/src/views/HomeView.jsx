@@ -17,7 +17,10 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
 
   const completed = tasks.filter(t => t.completed).length;
   const pending   = tasks.filter(t => !t.completed).length;
-  const pinned    = notes.filter(n => n.is_pinned).length;
+  // Bug fix: Count both pinned notes and pinned tasks correctly
+  const pinnedNotes = notes.filter(n => n.is_pinned && !n.is_deleted).length;
+  const pinnedTasks = tasks.filter(t => t.is_pinned && !t.is_deleted).length;
+  const pinned = pinnedNotes + pinnedTasks;
   const progress  = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
   const hour      = new Date().getHours();
   const greeting  = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';

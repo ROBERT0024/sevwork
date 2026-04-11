@@ -38,8 +38,8 @@ export const getTasks = (wsId = null, trash = false) => {
   const p = wsId ? { workspace_id: wsId, is_trash: trash } : { is_trash: trash };
   return api.get('/tasks/', { params: p });
 };
-export const createTask = (title, wsId, priority = 'medium', due_date = null, desc = '') =>
-  api.post('/tasks/', { title, workspace_id: wsId, priority, due_date, description: desc });
+export const createTask = (title, wsId, priority = 'medium', due_date = null, desc = '', comments = '') =>
+  api.post('/tasks/', { title, workspace_id: wsId, priority, due_date, description: desc, comments });
 export const updateTask = (id, data) => api.patch(`/tasks/${id}`, data);
 export const deleteTask = (id)       => api.delete(`/tasks/${id}`);
 export default api;

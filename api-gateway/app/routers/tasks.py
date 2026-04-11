@@ -54,6 +54,7 @@ def create_task(
         user_id=current_user.id,
         priority=task_data.priority,
         due_date=task_data.due_date,
+        comments=task_data.comments,
     )
     db.add(task)
     db.commit()
@@ -95,6 +96,8 @@ def update_task(
         task.is_deleted = task_data.is_deleted
     if task_data.is_pinned is not None:
         task.is_pinned = task_data.is_pinned
+    if task_data.comments is not None:
+        task.comments = task_data.comments
 
     import datetime
     task.updated_at = datetime.datetime.utcnow()

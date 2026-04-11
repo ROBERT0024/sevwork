@@ -20,6 +20,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate]   = useState('');
   const [description, setDescription] = useState('');
+  const [comments, setComments]       = useState('');
 
   useEffect(() => { if (showNewForm) { setShowForm(true); onFormShown?.(); } }, [showNewForm]);
 
@@ -36,10 +37,10 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
     const loadingToast = toast.loading(editingTask ? 'Actualizando tarea...' : 'Creando tarea...');
     try { 
       if (editingTask) {
-        await updateTask(editingTask.id, { title, priority, due_date: dueDate || null, description });
+        await updateTask(editingTask.id, { title, priority, due_date: dueDate || null, description, comments });
         toast.success('Tarea actulizada', { id: loadingToast });
       } else {
-        await createTask(title, activeWorkspace, priority, dueDate || null, description); 
+        await createTask(title, activeWorkspace, priority, dueDate || null, description, comments); 
         toast.success('Tarea agregada', { id: loadingToast });
       }
       resetForm();
@@ -49,7 +50,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
   };
 
   const resetForm = () => {
-    setTitle(''); setPriority('medium'); setDueDate(''); setDescription(''); setEditingTask(null); setShowForm(false);
+    setTitle(''); setPriority('medium'); setDueDate(''); setDescription(''); setComments(''); setEditingTask(null); setShowForm(false);
   };
 
   const openEdit = (t) => {
@@ -58,6 +59,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
     setPriority(t.priority);
     setDueDate(t.due_date ? t.due_date.split('T')[0] : '');
     setDescription(t.description || '');
+    setComments(t.comments || '');
     setShowForm(true);
   };
 
@@ -146,6 +148,15 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
+            <div className="mt-4">
+              <label className="text-[10px] font-bold text-textMuted uppercase tracking-widest ml-1">Bitácora / Comentarios</label>
+              <textarea
+                className="w-full bg-black/30 border border-dashed border-primary/30 rounded-lg p-3 text-sm text-textMain outline-none mt-1 resize-none h-[80px] focus:border-primary/60 transition-colors placeholder:text-textMuted/50"
+                placeholder="Anota qué hiciste o por qué se retrasó..."
+                value={comments}
+                onChange={e => setComments(e.target.value)}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap justify-between items-center border-t border-border pt-4 gap-3">
             <div className="flex items-center gap-3">
@@ -193,10 +204,15 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
                   <span className={`text-sm font-semibold truncate ${task.completed ? 'text-textMuted line-through' : 'text-textMain'}`}>
                     {task.title}
                   </span>
-                  {task.description && (
+          {task.description && (
                     <span className={`text-xs mt-1 truncate ${task.completed ? 'text-textMuted/50' : 'text-textMuted'}`}>
                       {task.description}
                     </span>
+                  )}
+                  {task.comments && (
+                    <div className="mt-2 p-2 bg-primary/5 border-l-2 border-primary rounded text-[11px] text-textMain italic">
+                      <span className="font-bold not-italic mr-1">Nota:</span> {task.comments}
+                    </div>
                   )}
                 </div>
                 

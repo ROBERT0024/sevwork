@@ -56,6 +56,7 @@ class Task(Base):
     priority = Column(String(10), default="medium")
     due_date = Column(DateTime, nullable=True)
     is_pinned = Column(Boolean, default=False)
+    comments = Column(Text, default="", nullable=True)
     workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_deleted = Column(Boolean, default=False)

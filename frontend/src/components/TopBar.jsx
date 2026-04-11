@@ -1,5 +1,5 @@
-import React from 'react';
-import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Search, Plus, LogOut, FileEdit } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Search, Plus, LogOut, FileEdit, Sun, Moon } from 'lucide-react';
 
 const VIEW_TITLES = {
   home: Home, notes: FileText, tasks: CheckSquare, calendar: CalendarDays,
@@ -14,6 +14,20 @@ const VIEW_NAMES = {
 function TopBar({ activeView, onSearchOpen, onNewNote, onNewTask, noteTitle }) {
   const Icon  = VIEW_TITLES[activeView] || Home;
   const title = activeView === 'editor' && noteTitle ? noteTitle : (VIEW_NAMES[activeView] || 'Inicio');
+
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   return (
     <header className="h-14 bg-surface/50 backdrop-blur-md border-b border-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-10 w-full">
@@ -50,6 +64,14 @@ function TopBar({ activeView, onSearchOpen, onNewNote, onNewTask, noteTitle }) {
             <Plus className="w-3.5 h-3.5" /> Nueva tarea
           </button>
         )}
+        <button 
+          className="flex items-center justify-center bg-transparent border border-border hover:bg-surface hover:text-primary p-2 rounded-lg transition-all"
+          onClick={toggleTheme}
+          title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+        >
+          {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+        </button>
+
         <button 
           className="flex items-center gap-1.5 bg-transparent border border-border hover:bg-surface hover:text-danger hover:border-danger/50 text-textMuted px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ml-1"
           onClick={() => { localStorage.clear(); window.location.href = '/'; }}

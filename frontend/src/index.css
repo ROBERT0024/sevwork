@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.1);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --danger: #ef4444;
+  --success: #10b981;
+}
+
+.dark {
+  --background: #040914;
+  --surface: #0d162a;
+  --surface-hover: #18243e;
+  --border: #1e293b;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-light: rgba(59, 130, 246, 0.15);
+  --text-main: #f8fafc;
+  --text-muted: #8b92b4;
+  --danger: #ef4444;
+  --success: #10b981;
+}
+
 @layer base {
   body {
     @apply bg-background text-textMain antialiased overflow-hidden selection:bg-primary selection:text-white;
