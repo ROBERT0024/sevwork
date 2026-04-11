@@ -1,7 +1,7 @@
 // NotesView.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { getNotes, createNote, deleteNote, updateNote } from '../services/api.js';
-import { Search, FileText, Star, Trash2, Plus, X, Settings2 } from 'lucide-react';
+import { Search, FileText, Star, Trash2, Plus, X, Settings2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { TAG_OPTIONS, getTagClasses, tagBadgeClass, getTagStyle } from '../utils/tagColors.js';
 import TagManager from '../components/TagManager.jsx';
@@ -189,8 +189,16 @@ function NotesView({ activeWorkspace, onOpenNote, showNewForm, onFormShown }) {
                 <Star className={`w-4 h-4 ${note.is_pinned ? 'fill-white text-white' : ''}`} />
               </button>
               <button 
+                className="p-2 rounded-lg text-textMuted hover:bg-primary/10 hover:text-primary transition-colors" 
+                onClick={e => { e.stopPropagation(); onOpenNote(note); }}
+                title="Editar Nota"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button 
                 className="p-2 rounded-lg text-textMuted hover:bg-danger/20 hover:text-danger transition-colors" 
                 onClick={e => handleDelete(note.id, e)}
+                title="Eliminar Nota"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

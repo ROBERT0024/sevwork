@@ -231,7 +231,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1 transition-opacity">
                 <button 
                   className={`p-1.5 rounded-lg transition-all ${task.is_pinned ? 'text-warning' : 'text-textMuted hover:text-warning hover:bg-warning/10'}`}
                   onClick={() => handleFavorite(task)}
