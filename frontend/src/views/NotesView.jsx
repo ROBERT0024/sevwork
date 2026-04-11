@@ -186,7 +186,7 @@ function NotesView({ activeWorkspace, onOpenNote, showNewForm, onFormShown }) {
                 onClick={e => handlePin(note, e)} 
                 title={note.is_pinned ? "Quitar de favoritos" : "Añadir a favoritos"}
               >
-                <Star className={`w-4 h-4 ${note.is_pinned ? 'fill-white text-white' : ''}`} />
+                <Star className={`w-4 h-4 ${note.is_pinned ? 'fill-current' : ''}`} />
               </button>
               <button 
                 className="p-2 rounded-lg text-textMuted hover:bg-primary/10 hover:text-primary transition-colors" 

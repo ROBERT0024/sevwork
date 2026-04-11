@@ -237,7 +237,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
                   onClick={() => handleFavorite(task)}
                   title={task.is_pinned ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                 >
-                  <Star className={`w-4 h-4 ${task.is_pinned ? 'fill-white text-white' : ''}`} />
+                  <Star className={`w-4 h-4 ${task.is_pinned ? 'fill-current' : ''}`} />
                 </button>
                 <button 
                   className="p-1.5 text-textMuted hover:text-primary hover:bg-primary/10 rounded-lg transition-all" 
