@@ -1,5 +1,5 @@
 // HomeView.jsx
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { getNotes, getTasks } from '../services/api.js';
 import { FileText, CheckCircle2, Star, Clock, Plus, Users, CalendarDays, Pin, ArrowRight, Flame, TrendingUp, PieChart as PieIcon, Download } from 'lucide-react';
 import { generateManagerialReport } from '../utils/ReportGenerator.js';
@@ -10,12 +10,79 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
   const [notes, setNotes] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const notifiedRef       = useRef(new Set()); // Para no repetir notificaciones en la sesión
 
   useEffect(() => {
     if (!activeWorkspace) return;
     getNotes(activeWorkspace).then(r => setNotes(r.data)).catch(() => {});
-    getTasks(activeWorkspace).then(r => setTasks(r.data)).catch(() => {});
+    getTasks(activeWorkspace).then(r => {
+      setTasks(r.data);
+      checkTaskDeadlines(r.data);
+    }).catch(() => {});
   }, [activeWorkspace]);
+
+  const checkTaskDeadlines = (allTasks) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const pendingTasks = allTasks.filter(t => !t.completed);
+    
+    // Categorías de avisos
+    const warnings3Days = [];
+    const urgent1Day    = [];
+    const overdueTasks  = [];
+
+    pendingTasks.forEach(t => {
+      if (!t.due_date || notifiedRef.current.has(t.id)) return;
+      
+      const due = new Date(t.due_date);
+      due.setHours(0, 0, 0, 0);
+      
+      const diffTime = due - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 3) {
+        warnings3Days.push(t);
+        notifiedRef.current.add(t.id);
+      } else if (diffDays === 1 || diffDays === 0) {
+        urgent1Day.push(t);
+        notifiedRef.current.add(t.id);
+      } else if (diffDays < 0) {
+        overdueTasks.push(t);
+        notifiedRef.current.add(t.id);
+      }
+    });
+
+    // Disparar las notificaciones de forma agrupada
+    if (overdueTasks.length > 0) {
+      toast.error(
+        <span>
+          <b>{overdueTasks.length} {overdueTasks.length === 1 ? 'tarea ha' : 'tareas han'} vencido.</b>
+          <br />No olvides actualizar la bitácora con los detalles.
+        </span>, 
+        { duration: 6000, icon: '🚨' }
+      );
+    }
+
+    if (urgent1Day.length > 0) {
+      toast.error(
+        <span>
+          <b>¡Urgencia! {urgent1Day.length} {urgent1Day.length === 1 ? 'tarea vence' : 'tareas vencen'} pronto (1 día).</b>
+          <br />Prioriza estos pendientes hoy.
+        </span>, 
+        { duration: 5000, icon: '⚠️' }
+      );
+    }
+
+    if (warnings3Days.length > 0) {
+      toast.success(
+        <span>
+          <b>Advertencia:</b> {warnings3Days.length} {warnings3Days.length === 1 ? 'tarea está' : 'tareas están'} a 3 días de vencer.
+        </span>, 
+        { duration: 4000, icon: '📅' }
+      );
+    }
+  };
 
   const completed = tasks.filter(t => t.completed).length;
   const pending   = tasks.filter(t => !t.completed).length;
