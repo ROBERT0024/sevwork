@@ -1,5 +1,5 @@
 // TasksView.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getTasks, createTask, updateTask, deleteTask } from '../services/api.js';
 import { CheckCircle2, Circle, Calendar as CalendarIcon, Trash2, Plus, X, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -21,6 +21,8 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
   const [dueDate, setDueDate]   = useState('');
   const [description, setDescription] = useState('');
   const [comments, setComments]       = useState('');
+  const [saved, setSaved]             = useState(true);
+  const saveTimer                     = useRef(null);
 
   useEffect(() => { if (showNewForm) { setShowForm(true); onFormShown?.(); } }, [showNewForm]);
 
@@ -38,7 +40,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
     try { 
       if (editingTask) {
         await updateTask(editingTask.id, { title, priority, due_date: dueDate || null, description, comments });
-        toast.success('Tarea actulizada', { id: loadingToast });
+        toast.success('Tarea actualizada', { id: loadingToast });
       } else {
         await createTask(title, activeWorkspace, priority, dueDate || null, description, comments); 
         toast.success('Tarea agregada', { id: loadingToast });
@@ -60,8 +62,35 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
     setDueDate(t.due_date ? t.due_date.split('T')[0] : '');
     setDescription(t.description || '');
     setComments(t.comments || '');
+    setSaved(true);
     setShowForm(true);
   };
+
+  const autoSaveTask = useCallback(async (id, data) => {
+    try { 
+      await updateTask(id, data); 
+      setSaved(true);
+      // Actualizar la lista local silenciosamente para reflejar cambios (opcional)
+      setTasks(current => current.map(t => t.id === id ? { ...t, ...data } : t));
+    } catch { /* ignorar error de auto-guardado */ }
+  }, []);
+
+  useEffect(() => {
+    if (editingTask) {
+      setSaved(false);
+      clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        autoSaveTask(editingTask.id, { 
+          title, 
+          priority, 
+          due_date: dueDate || null, 
+          description, 
+          comments 
+        });
+      }, 1500);
+    }
+    return () => clearTimeout(saveTimer.current);
+  }, [title, priority, dueDate, description, comments, editingTask, autoSaveTask]);
 
   const handleToggle = async (t) => {
     try { await updateTask(t.id, { completed: !t.completed }); load(); }
@@ -134,7 +163,14 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
       {showForm && (
         <form onSubmit={handleCreate} className="bg-surface border border-primary/50 rounded-xl p-5 mb-6 shadow-glow animate-fade-in-up">
           <div className="mb-4">
-            <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{editingTask ? 'Editando Tarea' : 'Nueva Tarea'}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{editingTask ? 'Editando Tarea' : 'Nueva Tarea'}</span>
+              {editingTask && (
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${saved ? 'text-success' : 'text-warning animate-pulse'}`}>
+                  {saved ? '✓ Guardado' : '● Guardando...'}
+                </span>
+              )}
+            </div>
             <input 
               autoFocus 
               className="w-full bg-transparent border-none text-base font-bold text-textMain outline-none placeholder:text-textMuted mt-1" 
