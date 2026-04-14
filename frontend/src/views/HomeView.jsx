@@ -56,29 +56,29 @@ function HomeView({ onNavigate, onOpenNote, activeWorkspace }) {
     // Disparar las notificaciones de forma agrupada
     if (overdueTasks.length > 0) {
       toast.error(
-        <span>
+        <div onClick={() => onNavigate('tasks')} className="cursor-pointer">
           <b>{overdueTasks.length} {overdueTasks.length === 1 ? 'tarea ha' : 'tareas han'} vencido.</b>
           <br />No olvides actualizar la bitácora con los detalles.
-        </span>, 
+        </div>, 
         { duration: 6000, icon: '🚨' }
       );
     }
 
     if (urgent1Day.length > 0) {
       toast.error(
-        <span>
+        <div onClick={() => onNavigate('tasks')} className="cursor-pointer">
           <b>¡Urgencia! {urgent1Day.length} {urgent1Day.length === 1 ? 'tarea vence' : 'tareas vencen'} pronto (1 día).</b>
           <br />Prioriza estos pendientes hoy.
-        </span>, 
+        </div>, 
         { duration: 5000, icon: '⚠️' }
       );
     }
 
     if (warnings3Days.length > 0) {
       toast.success(
-        <span>
+        <div onClick={() => onNavigate('tasks')} className="cursor-pointer">
           <b>Advertencia:</b> {warnings3Days.length} {warnings3Days.length === 1 ? 'tarea está' : 'tareas están'} a 3 días de vencer.
-        </span>, 
+        </div>, 
         { duration: 4000, icon: '📅' }
       );
     }
