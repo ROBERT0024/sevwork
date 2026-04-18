@@ -174,7 +174,7 @@ function TasksView({ activeWorkspace, showNewForm, onFormShown }) {
             <input 
               autoFocus 
               className="w-full bg-transparent border-none text-base font-bold text-textMain outline-none placeholder:text-textMuted mt-1" 
-              placeholder="¿Qué necesitas hacer hoy?" 
+              placeholder="Título de la tarea..." 
               value={title} 
               onChange={e => setTitle(e.target.value)} 
             />
