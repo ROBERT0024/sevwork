@@ -39,6 +39,16 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+# Configuración de CORS
+# Debe estar antes de otros middlewares para manejar correctamente las respuestas de error y preflights
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Middleware para Headers de Seguridad proactivos (HSTS, etc.)
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
@@ -47,18 +57,10 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; object-src 'none';"
+    # Se añade connect-src para permitir peticiones a la propia API si se carga desde el docs
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; object-src 'none'; connect-src 'self' http://localhost:8000;"
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     return response
-
-# Configuración de CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Registrar routers
 app.include_router(auth.router)
