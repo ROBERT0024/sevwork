@@ -21,6 +21,7 @@ export const register = (email, password) => api.post('/auth/register', { email,
 export const login    = (email, password) => api.post('/auth/login',    { email, password });
 export const getWorkspaces   = ()                => api.get('/workspaces/');
 export const createWorkspace = (name, desc = '') => api.post('/workspaces/', { name, description: desc });
+export const updateWorkspace = (id, data)        => api.patch(`/workspaces/${id}`, data);
 export const deleteWorkspace = (id)              => api.delete(`/workspaces/${id}`);
 export const getNotes = (wsId = null, search = '', tag = '', trash = false) => {
   const p = {};

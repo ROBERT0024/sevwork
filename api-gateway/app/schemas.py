@@ -46,6 +46,12 @@ class WorkspaceCreate(BaseModel):
     description: str = Field(default="", max_length=1000)
 
 
+class WorkspaceUpdate(BaseModel):
+    """Esquema para actualizar un espacio de trabajo."""
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
+
+
 class WorkspaceResponse(BaseModel):
     """Respuesta de un espacio de trabajo."""
     id: int

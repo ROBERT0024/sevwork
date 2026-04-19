@@ -11,7 +11,7 @@ import CalendarView  from './views/CalendarView.jsx';
 import FavoritesView from './views/FavoritesView.jsx';
 import SharedView    from './views/SharedView.jsx';
 import TrashView     from './views/TrashView.jsx';
-import { getWorkspaces, createWorkspace } from './services/api.js';
+import { getWorkspaces, createWorkspace, updateWorkspace } from './services/api.js';
 
 
 function MainLayout() {
@@ -50,6 +50,14 @@ function MainLayout() {
     catch { /* ignore */ }
   };
 
+  const handleUpdateWorkspace = async (id, name) => {
+    try { 
+      const res = await updateWorkspace(id, { name }); 
+      setWorkspaces(p => p.map(w => w.id === id ? res.data : w)); 
+    }
+    catch { /* ignore */ }
+  };
+
   const handleOpenNote    = (note) => { setOpenNote(note); setView('editor'); };
   const handleBackEditor  = ()     => { setOpenNote(null); setView('notes'); };
   const handleNavigate    = (v)    => { if (v !== 'editor') setOpenNote(null); setView(v); };
@@ -60,6 +68,7 @@ function MainLayout() {
       <Sidebar activeView={activeView} onNavigate={handleNavigate}
         workspaces={workspaces} activeWorkspace={activeWs}
         onWorkspaceChange={setActiveWs} onCreateWorkspace={handleCreateWorkspace}
+        onUpdateWorkspace={handleUpdateWorkspace}
         userEmail={userEmail} />
       
       <div className="flex flex-col flex-1 overflow-hidden bg-background">

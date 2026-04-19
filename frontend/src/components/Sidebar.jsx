@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Plus, Zap, UserPlus } from 'lucide-react';
+import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Plus, Zap, UserPlus, Pencil, Check, X } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'home',      icon: Home,         label: 'Inicio'     },
@@ -11,15 +11,37 @@ const NAV_ITEMS = [
   { id: 'trash',     icon: Trash2,       label: 'Papelera'   },
 ];
 
-function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorkspaceChange, onCreateWorkspace, userEmail }) {
+function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorkspaceChange, onCreateWorkspace, onUpdateWorkspace, userEmail }) {
   const [showNewWs, setShowNewWs] = useState(false);
   const [newWsName, setNewWsName] = useState('');
+  const [editingWsId, setEditingWsId] = useState(null);
+  const [editingWsName, setEditingWsName] = useState('');
 
   const handleCreateWs = (e) => {
     e.preventDefault();
     if (!newWsName.trim()) return;
     onCreateWorkspace(newWsName);
     setNewWsName(''); setShowNewWs(false);
+  };
+
+  const startEdit = (e, ws) => {
+    e.stopPropagation();
+    setEditingWsId(ws.id);
+    setEditingWsName(ws.name);
+  };
+
+  const cancelEdit = (e) => {
+    e?.stopPropagation();
+    setEditingWsId(null);
+    setEditingWsName('');
+  };
+
+  const handleUpdateWs = (e) => {
+    e.preventDefault();
+    if (editingWsName.trim() && editingWsName !== workspaces.find(w => w.id === editingWsId)?.name) {
+      onUpdateWorkspace(editingWsId, editingWsName);
+    }
+    cancelEdit();
   };
 
   return (
@@ -92,12 +114,37 @@ function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorksp
           {workspaces.map(ws => (
             <li 
               key={ws.id} 
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-colors
+              className={`group flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-colors
                 ${ws.id === activeWorkspace ? 'bg-primary/10 text-primaryHover' : 'text-textMuted hover:bg-surfaceHover hover:text-textMain'}`} 
               onClick={() => onWorkspaceChange(ws.id)}
             >
-              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${ws.id === activeWorkspace ? 'bg-primaryHover' : 'bg-textMuted/50'}`} />
-              <span className="truncate">{ws.name}</span>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${ws.id === activeWorkspace ? 'bg-primaryHover' : 'bg-textMuted/50'}`} />
+                {editingWsId === ws.id ? (
+                  <form onSubmit={handleUpdateWs} className="flex-1 min-w-0 flex items-center gap-1">
+                    <input 
+                      autoFocus 
+                      value={editingWsName} 
+                      onChange={e => setEditingWsName(e.target.value)} 
+                      onBlur={handleUpdateWs}
+                      onKeyDown={e => e.key === 'Escape' && cancelEdit(e)}
+                      className="w-full bg-background border border-primary rounded px-1.5 py-0.5 text-xs text-textMain outline-none" 
+                      onClick={e => e.stopPropagation()}
+                    />
+                  </form>
+                ) : (
+                  <span className="truncate">{ws.name}</span>
+                )}
+              </div>
+              
+              {editingWsId !== ws.id && (
+                <button 
+                  onClick={(e) => startEdit(e, ws)}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:text-primary transition-all rounded-md hover:bg-primary/10"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              )}
             </li>
           ))}
         </ul>
