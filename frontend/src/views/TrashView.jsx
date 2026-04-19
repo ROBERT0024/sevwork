@@ -13,7 +13,7 @@ function TrashView({ activeWorkspace }) {
     try {
       const [notesRes, tasksRes] = await Promise.all([
         getNotes(activeWorkspace, '', '', true),
-        getTasks(activeWorkspace, true)
+        getTasks(activeWorkspace, '', true)
       ]);
       setDeletedNotes(notesRes.data);
       setDeletedTasks(tasksRes.data);
