@@ -150,3 +150,5 @@ Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
 **diegohrnz89-ai** — Especialización en Ciberseguridad con énfasis en DevSecOps
 
 **Carlos.Gonzalez** - Especialización en Ciberseguridad con énfasis en DevSecOps
+
+**danielmaodaza** - Especialización en Ciberseguridad con énfasis en DevSecOps
