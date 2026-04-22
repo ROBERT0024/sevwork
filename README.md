@@ -67,9 +67,11 @@ Semgrep
 
 ## 🚀 Inicio Rápido
 
+> 📖 **¿Primera vez?** Lee la [Guía de Instalación Completa](docs/GUIA_INSTALACION.md) con explicaciones paso a paso y solución de problemas.
+
 ### Requisitos previos
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado **y abierto**
 - [Git](https://git-scm.com/downloads) instalado
 
 ### Pasos
@@ -79,13 +81,19 @@ Semgrep
 git clone https://github.com/ROBERT0024/sevwork.git
 cd sevwork
 
-# 2. Crear archivo de configuración
-cp .env.example .env
+# 2. Crear archivo de configuración (copiar el ejemplo)
+# Windows PowerShell:
+Copy-Item .env.example .env
+# Mac/Linux:
+# cp .env.example .env
 
-# 3. Levantar todos los servicios
+# 3. Levantar todos los servicios (primera vez tarda 3-8 min)
 docker-compose up --build -d
 
-# 4. Abrir en el navegador
+# 4. Verificar que todo esté corriendo
+docker-compose ps
+
+# 5. Abrir en el navegador
 # Frontend: http://localhost:3000
 # API Docs: http://localhost:8000/docs
 ```
@@ -132,6 +140,7 @@ sevwork/
 
 | Documento | Descripción |
 |-----------|-------------|
+| [**⭐ Guía de Instalación**](docs/GUIA_INSTALACION.md) | **Paso a paso para hacer funcionar el proyecto en cualquier máquina** |
 | [Arquitectura](docs/architecture.md) | Diagramas de componentes, despliegue, secuencia y casos de uso |
 | [Modelo de Amenazas](docs/threat-model.md) | DFD nivel 0 y 1, análisis STRIDE detallado |
 | [Controles de Seguridad](docs/security.md) | Autenticación, autorización, gestión de vulnerabilidades |
