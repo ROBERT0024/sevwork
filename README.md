@@ -71,37 +71,35 @@ Semgrep
 | 🌐 DAST | OWASP ZAP | Escaneo dinámico de la API |
 | 🚀 Release | Docker Hub | Publica imágenes con versionado semántico |
 
-## 🚀 Inicio Rápido
+## 🚀 Inicio Rápido (Modo Fácil)
 
-> 📖 **¿Primera vez?** Lee la [Guía de Instalación Completa](docs/GUIA_INSTALACION.md) con explicaciones paso a paso y solución de problemas.
+> 📖 **¿Primera vez?** Lee la [Guía de Instalación Completa](docs/GUIA_INSTALACION.md) para más detalles.
 
-### Requisitos previos
+### Pasos para "Burros" (Un Solo Clic)
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado **y abierto**
-- [Git](https://git-scm.com/downloads) instalado
+1. [Descarga el proyecto como ZIP](https://github.com/ROBERT0024/sevwork/archive/refs/heads/main.zip) y descomprímelo (o usa `git clone`).
+2. Abre **Docker Desktop**.
+3. **Windows:** Haz doble clic en el archivo `setup.bat`.
+4. **Mac/Linux:** Ejecuta `sh setup.sh` en la terminal.
 
-### Pasos
+¡Eso es todo! El script configurará todo, levantará el servidor y te abrirá el navegador automáticamente.
+
+---
+
+### Pasos Manuales (Si prefieres la terminal)
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clonar
 git clone https://github.com/ROBERT0024/sevwork.git
 cd sevwork
 
-# 2. Crear archivo de configuración (copiar el ejemplo)
-# Windows PowerShell:
-Copy-Item .env.example .env
-# Mac/Linux:
-# cp .env.example .env
+# 2. Configurar (copiar ejemplo)
+# Windows: copy .env.example .env  |  Mac: cp .env.example .env
 
-# 3. Levantar todos los servicios (primera vez tarda 3-8 min)
+# 3. Levantar
 docker-compose up --build -d
 
-# 4. Verificar que todo esté corriendo
-docker-compose ps
-
-# 5. Abrir en el navegador
-# Frontend: http://localhost:3000
-# API Docs: http://localhost:8000/docs
+# 4. Abrir: http://localhost:3000
 ```
 
 ### Apagar los servicios

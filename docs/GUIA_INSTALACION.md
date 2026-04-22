@@ -8,15 +8,29 @@
 
 ## 📋 Tabla de Contenido
 
-1. [Requisitos (qué necesitas instalar ANTES)](#-paso-0--requisitos-previos)
-2. [Clonar el proyecto](#-paso-1--clonar-el-repositorio)
-3. [Configurar variables de entorno](#-paso-2--configurar-el-archivo-env)
-4. [Encender Docker Desktop](#-paso-3--encender-docker-desktop)
-5. [Levantar el proyecto](#-paso-4--levantar-el-proyecto-con-docker)
-6. [Abrir la aplicación](#-paso-5--abrir-la-aplicación-en-el-navegador)
-7. [Apagar el proyecto](#-paso-6--apagar-el-proyecto)
-8. [Solución de problemas](#-solución-de-problemas-comunes)
-9. [Notas importantes](#-notas-importantes)
+1. [MODO FÁCIL: Un Solo Clic (Recomendado)](#⭐-modo-fácil-un-solo-clic-recomendado)
+2. [Requisitos (qué necesitas instalar ANTES)](#-paso-0--requisitos-previos)
+3. [Clonar el proyecto](#-paso-1--clonar-el-repositorio)
+4. [Configurar variables de entorno](#-paso-2--configurar-el-archivo-env)
+5. [Encender Docker Desktop](#-paso-3--encender-docker-desktop)
+6. [Levantar el proyecto](#-paso-4--levantar-el-proyecto-con-docker)
+7. [Abrir la aplicación](#-paso-5--abrir-la-aplicación-en-el-navegador)
+8. [Apagar el proyecto](#-paso-6--apagar-el-proyecto)
+9. [Solución de problemas](#-solución-de-problemas-comunes)
+10. [Notas importantes](#-notas-importantes)
+
+---
+
+## ⭐ MODO FÁCIL: Un Solo Clic (Recomendado)
+
+Si no quieres usar la terminal ni escribir comandos, haz esto:
+
+1. Asegúrate de tener **Docker Desktop** abierto.
+2. **Entra a la carpeta** del proyecto (`sevwork`).
+3. Busca el archivo correspondiente a tu sistema:
+   - **En Windows:** Haz doble clic en el archivo `setup.bat`.
+   - **En Mac o Linux:** Abre una terminal en la carpeta y escribe `sh setup.sh`.
+4. El script hará todo el trabajo sucio por ti y te abrirá el navegador cuando esté listo.
 
 ---
 
