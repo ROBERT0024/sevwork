@@ -1,5 +1,11 @@
 # 🔒 Secure Workspace
 
+> [!IMPORTANT]
+> ### 🚀 [¡HAZ CLIC AQUÍ PARA DESCARGAR E INSTALAR EL PROYECTO!](docs/GUIA_INSTALACION.md)
+> **Sigue esta guía paso a paso para hacer funcionar el proyecto en tu máquina.**
+
+---
+
 [![DevSecOps Pipeline](https://github.com/ROBERT0024/sevwork/actions/workflows/devsecops.yml/badge.svg)](https://github.com/ROBERT0024/sevwork/actions/workflows/devsecops.yml)
 [![License: MIT](https://img.shields.io/badge/Licencia-MIT-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](docker-compose.yml)
