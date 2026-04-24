@@ -30,7 +30,12 @@ Si no quieres usar la terminal ni escribir comandos, haz esto:
 3. Busca el archivo correspondiente a tu sistema:
    - **En Windows:** Haz doble clic en el archivo `setup.bat`.
    - **En Mac o Linux:** Abre una terminal en la carpeta y escribe `sh setup.sh`.
-4. El script hará todo el trabajo sucio por ti y te abrirá el navegador cuando esté listo.
+4. El script hará todo el trabajo sucio por ti:
+   - Verificará si Docker está realmente iniciado.
+   - Revisará si hay conflictos de puertos.
+   - Creará el archivo de configuración `.env` automáticamente.
+   - Te abrirá el navegador cuando todo esté listo.
+
 
 ---
 
