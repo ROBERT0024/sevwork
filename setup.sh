@@ -59,8 +59,8 @@ else
 fi
 
 # 5. Levantar contenedores
-echo "[4/5] 🏗️  Levantando contenedores con $COMPOSE_FILE..."
-echo "(Esto puede tardar varios minutos si es la primera vez)"
+echo "[4/5] Levantando contenedores con $COMPOSE_FILE..."
+echo "(NOTA: La primera vez puede tardar unos 5 minutos bajando imagenes. No cierres esta ventana.)"
 echo
 
 # Detectar comando (docker compose vs docker-compose)
@@ -84,7 +84,7 @@ echo
 echo "[5/5] 🌐 Todo listo. Abriendo la aplicacion en el navegador..."
 sleep 5
 
-URL="http://localhost:3000"
+URL="http://localhost:3000/dashboard"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     xdg-open $URL
 elif [[ "$OSTYPE" == "darwin"* ]]; then
