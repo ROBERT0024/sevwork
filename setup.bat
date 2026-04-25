@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 title Instalador Secure Workspace
 cls
@@ -9,7 +10,7 @@ echo ========================================================
 echo.
 
 :: 1. Verificar si Docker está instalado
-echo [1/4] 🔍 Verificando instalacion de Docker...
+echo [1/5] 🔍 Verificando instalacion de Docker...
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ❌ ERROR: Docker no esta instalado en este PC.
@@ -24,7 +25,7 @@ if %errorlevel% neq 0 (
 echo ✅ Docker esta instalado.
 
 :: 2. Verificar si el motor de Docker (Daemon) está corriendo
-echo [2/4] 🐳 Verificando que Docker este abierto y listo...
+echo [2/5] 🐳 Verificando que Docker este abierto y listo...
 docker info >nul 2>&1
 if %errorlevel% neq 0 (
     echo ❌ ERROR: Docker esta instalado pero NO esta corriendo.
@@ -47,8 +48,40 @@ if %errorlevel% neq 0 (
 )
 echo ✅ Docker esta corriendo correctamente.
 
-:: 3. Verificar conflictos de puertos
-echo [3/4] 🔍 Verificando disponibilidad de puertos...
+:: 3. Selección de modo de ejecución
+echo.
+echo ========================================================
+echo   📦 SELECCIONA EL MODO DE EJECUCION
+echo ========================================================
+echo.
+echo   1^) 🏗️  Modo LOCAL (construir desde codigo fuente^)
+echo      → Usa el codigo del repositorio clonado.
+echo      → Ideal para desarrollo o si modificaste el codigo.
+echo.
+echo   2^) 🐳 Modo DOCKER HUB (descargar imagenes pre-construidas^)
+echo      → Descarga las imagenes ya listas desde Docker Hub.
+echo      → Mas rapido, no necesita compilar nada.
+echo.
+set /p MODO="Elige una opcion [1/2] (por defecto: 1): "
+
+if "%MODO%"=="" set MODO=1
+
+if "%MODO%"=="2" (
+    echo.
+    echo ✅ Modo seleccionado: DOCKER HUB (imagenes pre-construidas^)
+    set "COMPOSE_FILE=docker-compose.hub.yml"
+    set "BUILD_FLAG="
+    set "MODO_NOMBRE=Docker Hub"
+) else (
+    echo.
+    echo ✅ Modo seleccionado: LOCAL (construccion desde codigo fuente^)
+    set "COMPOSE_FILE=docker-compose.yml"
+    set "BUILD_FLAG=--build"
+    set "MODO_NOMBRE=Local"
+)
+
+:: 4. Verificar conflictos de puertos
+echo [3/5] 🔍 Verificando disponibilidad de puertos...
 set "PORTS=3000 8000 5432 6379"
 set "CONFLICT=0"
 
@@ -71,18 +104,18 @@ if %CONFLICT% equ 1 (
     echo ✅ Todos los puertos necesarios estan libres.
 )
 
-:: 4. Configurar variables de entorno
+:: 5. Configurar variables de entorno
 if not exist .env (
-    echo [4/4] 📄 Creando archivo de configuracion .env...
+    echo [4/5] 📄 Creando archivo de configuracion .env...
     copy .env.example .env >nul
     echo ✅ Archivo .env creado desde la plantilla.
 ) else (
-    echo [4/4] ✅ El archivo .env ya existe.
+    echo [4/5] ✅ El archivo .env ya existe.
 )
 
-:: 5. Levantar contenedores
+:: 6. Levantar contenedores
 echo.
-echo 🏗️  Levantando servicios (esto puede tardar unos minutos^)...
+echo 🏗️  Levantando servicios con !COMPOSE_FILE! (esto puede tardar unos minutos^)...
 echo.
 
 :: Intentar con 'docker compose' (V2) primero, luego 'docker-compose' (V1)
@@ -92,7 +125,13 @@ if %errorlevel% neq 0 (
     set "DOCKER_CMD=docker-compose"
 )
 
-%DOCKER_CMD% up -d --build
+:: Si es modo Docker Hub, forzar descarga de imágenes nuevas
+if "%MODO%"=="2" (
+    echo 🔄 Descargando imágenes más recientes de Docker Hub...
+    %DOCKER_CMD% -f !COMPOSE_FILE! pull
+)
+
+%DOCKER_CMD% -f !COMPOSE_FILE! up -d !BUILD_FLAG!
 
 if %errorlevel% neq 0 (
     echo.
@@ -100,14 +139,14 @@ if %errorlevel% neq 0 (
     echo.
     echo Sugerencias:
     echo - Asegurate de tener conexion a internet.
-    echo - Ejecuta: %DOCKER_CMD% down para limpiar estados previos.
+    echo - Ejecuta: %DOCKER_CMD% -f !COMPOSE_FILE! down para limpiar estados previos.
     echo - Revisa que Docker Desktop tenga habilitado "WSL 2 based engine" en Settings.
     echo.
     pause
     exit /b
 )
 
-:: 6. Finalización
+:: 7. Finalización
 echo.
 echo 🌐 Todo listo. Abriendo la aplicacion en: http://localhost:3000
 timeout /t 5 >nul
@@ -118,7 +157,11 @@ echo ========================================================
 echo   ✅ ¡INSTALACION COMPLETADA CON EXITO!
 echo ========================================================
 echo.
+echo   Modo: !MODO_NOMBRE!
+echo   Archivo: !COMPOSE_FILE!
+echo   App:  http://localhost:3000
+echo   API:  http://localhost:8000
+echo.
 echo Ya puedes cerrar esta ventana y usar la aplicacion.
 echo.
 pause
-

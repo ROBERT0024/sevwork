@@ -9,15 +9,16 @@
 ## 📋 Tabla de Contenido
 
 1. [MODO FÁCIL: Un Solo Clic (Recomendado)](#⭐-modo-fácil-un-solo-clic-recomendado)
-2. [Requisitos (qué necesitas instalar ANTES)](#-paso-0--requisitos-previos)
-3. [Clonar el proyecto](#-paso-1--clonar-el-repositorio)
-4. [Configurar variables de entorno](#-paso-2--configurar-el-archivo-env)
-5. [Encender Docker Desktop](#-paso-3--encender-docker-desktop)
-6. [Levantar el proyecto](#-paso-4--levantar-el-proyecto-con-docker)
-7. [Abrir la aplicación](#-paso-5--abrir-la-aplicación-en-el-navegador)
-8. [Apagar el proyecto](#-paso-6--apagar-el-proyecto)
-9. [Solución de problemas](#-solución-de-problemas-comunes)
-10. [Notas importantes](#-notas-importantes)
+2. [MODO DOCKER HUB: Sin Compilar Nada](#-modo-docker-hub-sin-compilar-nada-alternativa-rápida)
+3. [Requisitos (qué necesitas instalar ANTES)](#-paso-0--requisitos-previos)
+4. [Clonar el proyecto](#-paso-1--clonar-el-repositorio)
+5. [Configurar variables de entorno](#-paso-2--configurar-el-archivo-env)
+6. [Encender Docker Desktop](#-paso-3--encender-docker-desktop)
+7. [Levantar el proyecto](#-paso-4--levantar-el-proyecto-con-docker)
+8. [Abrir la aplicación](#-paso-5--abrir-la-aplicación-en-el-navegador)
+9. [Apagar el proyecto](#-paso-6--apagar-el-proyecto)
+10. [Solución de problemas](#-solución-de-problemas-comunes)
+11. [Notas importantes](#-notas-importantes)
 
 ---
 
@@ -30,14 +31,90 @@ Si no quieres usar la terminal ni escribir comandos, haz esto:
 3. Busca el archivo correspondiente a tu sistema:
    - **En Windows:** Haz doble clic en el archivo `setup.bat`.
    - **En Mac o Linux:** Abre una terminal en la carpeta y escribe `sh setup.sh`.
-4. El script hará todo el trabajo sucio por ti:
+4. **Elige el modo de ejecución** cuando te lo pregunte:
+   - **Opción 1 — Modo Local:** Construye todo desde el código fuente (ideal si quieres desarrollar o modificaste algo).
+   - **Opción 2 — Modo Docker Hub:** Descarga las imágenes ya construidas (más rápido, no compila nada).
+5. El script hará todo el trabajo sucio por ti:
    - Verificará si Docker está realmente iniciado.
    - Revisará si hay conflictos de puertos.
    - Creará el archivo de configuración `.env` automáticamente.
    - Te abrirá el navegador cuando todo esté listo.
 
-
 ---
+
+## 🐳 MODO DOCKER HUB: Sin Compilar Nada (Alternativa Rápida)
+
+Si prefieres **no clonar el repositorio completo** o quieres la forma más rápida de probar la aplicación, puedes usar las imágenes pre-construidas que publicamos en [Docker Hub](https://hub.docker.com/r/robert0024/sevwork).
+
+### ¿Qué necesitas?
+
+| Requisito | ¿Por qué? |
+|-----------|-----------|
+| **Docker Desktop** instalado y corriendo | Para ejecutar los contenedores |
+| **Archivo `docker-compose.hub.yml`** | Define qué imágenes descargar |
+| **Archivo `.env`** | Configuración de contraseñas y conexiones |
+
+> [!TIP]
+> **No necesitas Git, Python, Node.js ni nada más.** Solo Docker Desktop y dos archivos.
+
+### Paso a Paso
+
+#### 1. Descarga los 2 archivos necesarios
+
+Descárgalos directamente desde GitHub:
+
+- 📄 [`docker-compose.hub.yml`](https://raw.githubusercontent.com/ROBERT0024/sevwork/main/docker-compose.hub.yml)
+- 📄 [`.env.example`](https://raw.githubusercontent.com/ROBERT0024/sevwork/main/.env.example)
+
+Ponlos en **una misma carpeta** en tu computador (por ejemplo, `C:\SecureWorkspace\` o `~/secure-workspace/`).
+
+#### 2. Renombra `.env.example` a `.env`
+
+```powershell
+# Windows PowerShell
+Rename-Item .env.example .env
+
+# Windows CMD
+ren .env.example .env
+
+# Mac/Linux
+mv .env.example .env
+```
+
+#### 3. Abre Docker Desktop
+
+Espera a que el ícono de la ballena 🐳 esté quieto (sin animación = listo).
+
+#### 4. Levanta los servicios
+
+Abre una terminal en la carpeta donde guardaste los archivos y ejecuta:
+
+```bash
+docker compose -f docker-compose.hub.yml up -d
+```
+
+> [!NOTE]
+> **La primera vez descarga ~500 MB** de imágenes. Las siguientes veces arrancará en segundos.
+
+#### 5. Abre la aplicación
+
+👉 **[http://localhost:3000](http://localhost:3000)**
+
+### Apagar los servicios (Modo Docker Hub)
+
+```bash
+docker compose -f docker-compose.hub.yml down
+```
+
+### Imágenes disponibles en Docker Hub
+
+| Imagen | Descripción |
+|--------|-------------|
+| `robert0024/sevwork:api-latest` | API Gateway (FastAPI) |
+| `robert0024/sevwork:worker-latest` | Worker Celery |
+| `robert0024/sevwork:frontend-latest` | Frontend (React + Nginx) |
+
+
 
 ## ⚙️ Paso 0 — Requisitos Previos
 
@@ -248,6 +325,8 @@ docker-compose up -d
 
 ## 🔄 Resumen Rápido (cheat sheet)
 
+### Modo Local (docker-compose.yml)
+
 | Quiero... | Comando |
 |-----------|---------|
 | Levantar todo (primera vez) | `docker-compose up --build -d` |
@@ -259,6 +338,17 @@ docker-compose up -d
 | Apagar todo (borrar datos) | `docker-compose down -v` |
 | Reiniciar un servicio | `docker-compose restart api-gateway` |
 | Reconstruir después de cambiar código | `docker-compose up --build -d` |
+
+### Modo Docker Hub (docker-compose.hub.yml)
+
+| Quiero... | Comando |
+|-----------|---------|
+| Levantar todo (descarga imágenes) | `docker compose -f docker-compose.hub.yml up -d` |
+| Ver si todo está corriendo | `docker compose -f docker-compose.hub.yml ps` |
+| Ver los logs | `docker compose -f docker-compose.hub.yml logs -f` |
+| Apagar todo (guardar datos) | `docker compose -f docker-compose.hub.yml down` |
+| Apagar todo (borrar datos) | `docker compose -f docker-compose.hub.yml down -v` |
+| Actualizar a la última versión | `docker compose -f docker-compose.hub.yml pull && docker compose -f docker-compose.hub.yml up -d` |
 
 ---
 

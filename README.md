@@ -81,12 +81,15 @@ Semgrep
 2. Abre **Docker Desktop**.
 3. **Windows:** Haz doble clic en el archivo `setup.bat`.
 4. **Mac/Linux:** Ejecuta `sh setup.sh` en la terminal.
+5. **Elige el modo:** El script te preguntará si quieres construir desde el código fuente o descargar las imágenes de Docker Hub.
 
 ¡Eso es todo! El script configurará todo, levantará el servidor y te abrirá el navegador automáticamente.
 
 ---
 
-### Pasos Manuales (Si prefieres la terminal)
+### Opción A: Modo Local (Construir desde código fuente)
+
+Ideal para desarrollo o si modificaste el código.
 
 ```bash
 # 1. Clonar
@@ -96,16 +99,40 @@ cd sevwork
 # 2. Configurar (copiar ejemplo)
 # Windows: copy .env.example .env  |  Mac: cp .env.example .env
 
-# 3. Levantar
+# 3. Levantar (construye las imágenes desde el código fuente)
 docker-compose up --build -d
 
 # 4. Abrir: http://localhost:3000
 ```
 
+### Opción B: Modo Docker Hub (Imágenes pre-construidas)
+
+Más rápido, no necesita compilar nada. Ideal para probar la aplicación sin modificar código.
+
+```bash
+# 1. Clonar
+git clone https://github.com/ROBERT0024/sevwork.git
+cd sevwork
+
+# 2. Configurar (copiar ejemplo)
+# Windows: copy .env.example .env  |  Mac: cp .env.example .env
+
+# 3. Levantar (descarga las imágenes ya construidas desde Docker Hub)
+docker compose -f docker-compose.hub.yml up -d
+
+# 4. Abrir: http://localhost:3000
+```
+
+> 💡 **¿No quieres clonar todo el repositorio?** Solo necesitas los archivos `docker-compose.hub.yml` y `.env.example`. Descárgalos, renombra `.env.example` a `.env`, y ejecuta el comando del paso 3.
+
 ### Apagar los servicios
 
 ```bash
+# Si usaste Modo Local:
 docker-compose down
+
+# Si usaste Modo Docker Hub:
+docker compose -f docker-compose.hub.yml down
 ```
 
 ## 📂 Estructura del Proyecto
@@ -135,7 +162,8 @@ sevwork/
 │   └── user-manual.md    # Manual de usuario
 ├── .github/workflows/
 │   └── devsecops.yml     # Pipeline CI/CD completo
-├── docker-compose.yml    # Orquestación local
+├── docker-compose.yml    # Orquestación local (build desde código)
+├── docker-compose.hub.yml # Orquestación con imágenes de Docker Hub
 ├── LICENSE               # Licencia MIT
 └── README.md             # Este archivo
 ```
