@@ -75,7 +75,7 @@ Semgrep
 
 > 📖 **¿Primera vez?** Lee la [Guía de Instalación Completa](docs/GUIA_INSTALACION.md) para más detalles.
 
-### Pasos para "Burros" (Un Solo Clic)
+### Pasos para "Principiantes" (Un Solo Clic)
 
 1. [Descarga el proyecto como ZIP](https://github.com/ROBERT0024/sevwork/archive/refs/heads/main.zip) y descomprímelo (o usa `git clone`).
 2. Abre **Docker Desktop**.
