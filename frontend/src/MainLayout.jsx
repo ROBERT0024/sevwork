@@ -20,22 +20,18 @@ function MainLayout() {
   const [workspaces, setWorkspaces] = useState([]);
   const [activeWs, setActiveWs]   = useState(null);
   const [showSearch, setShowSearch] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [triggerNewNote, setTriggerNewNote] = useState(false);
+  const [triggerNewTask, setTriggerNewTask] = useState(false);
   const userEmail = localStorage.getItem('user_email') || 'usuario@workspace';
 
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setShowSearch(true); }
-      if (e.key === 'Escape') { setShowSearch(false); setIsSidebarOpen(false); }
+      if (e.key === 'Escape') setShowSearch(false);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
-
-  useEffect(() => {
-    // Cerrar sidebar al cambiar de vista en movil
-    setIsSidebarOpen(false);
-  }, [view, openNote]);
 
   useEffect(() => {
     getWorkspaces().then(async res => {
@@ -68,28 +64,17 @@ function MainLayout() {
   const activeView = openNote ? 'editor' : view;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30 relative">
-      {/* Overlay para movil */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-20 md:hidden animate-fade-in"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
+    <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30">
       <Sidebar activeView={activeView} onNavigate={handleNavigate}
         workspaces={workspaces} activeWorkspace={activeWs}
         onWorkspaceChange={setActiveWs} onCreateWorkspace={handleCreateWorkspace}
         onUpdateWorkspace={handleUpdateWorkspace}
-        userEmail={userEmail}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)} />
+        userEmail={userEmail} />
       
       <div className="flex flex-col flex-1 overflow-hidden bg-background">
         <TopBar activeView={activeView} onSearchOpen={() => setShowSearch(true)}
           onNewNote={() => { setView('notes'); setTriggerNewNote(true); }}
           onNewTask={() => { setView('tasks'); setTriggerNewTask(true); }}
-          onMenuOpen={() => setIsSidebarOpen(true)}
           noteTitle={openNote?.title} />
         
         <main className="flex-1 overflow-y-auto w-full relative">

@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { id: 'trash',     icon: Trash2,       label: 'Papelera'   },
 ];
 
-function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorkspaceChange, onCreateWorkspace, onUpdateWorkspace, userEmail, isOpen, onClose }) {
+function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorkspaceChange, onCreateWorkspace, onUpdateWorkspace, userEmail }) {
   const [showNewWs, setShowNewWs] = useState(false);
   const [newWsName, setNewWsName] = useState('');
   const [editingWsId, setEditingWsId] = useState(null);
@@ -45,29 +45,21 @@ function Sidebar({ activeView, onNavigate, workspaces, activeWorkspace, onWorksp
   };
 
   return (
-    <aside className={`
-      fixed inset-y-0 left-0 z-30 w-64 bg-surface border-r border-border flex flex-col h-full shrink-0 overflow-y-auto transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:block
-      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-    `}>
+    <aside className="w-60 min-w-[240px] bg-surface border-r border-border flex flex-col h-full shrink-0 overflow-y-auto">
       
       {/* Header / Workspace Selector Placeholder */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primaryHover flex items-center justify-center text-white shadow-glow shrink-0">
-            <Zap className="w-4 h-4 fill-white text-white" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-textMain truncate">
-              {workspaces.find(w => w.id === activeWorkspace)?.name || 'Workspace'}
-            </span>
-            <span className="text-[11px] text-textMuted font-medium truncate">
-              {userEmail}
-            </span>
-          </div>
+      <div className="flex items-center gap-3 p-4 border-b border-border">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primaryHover flex items-center justify-center text-white shadow-glow shrink-0">
+          <Zap className="w-4 h-4 fill-white text-white" />
         </div>
-        <button onClick={onClose} className="md:hidden p-1 hover:bg-surfaceHover rounded-md text-textMuted">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-bold text-textMain truncate">
+            {workspaces.find(w => w.id === activeWorkspace)?.name || 'Workspace'}
+          </span>
+          <span className="text-[11px] text-textMuted font-medium truncate">
+            {userEmail}
+          </span>
+        </div>
       </div>
 
       {/* Main Nav */}

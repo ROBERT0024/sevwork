@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Search, Plus, LogOut, FileEdit, Sun, Moon, Menu } from 'lucide-react';
+import { Home, FileText, CheckSquare, CalendarDays, Star, Users, Trash2, Search, Plus, LogOut, FileEdit, Sun, Moon } from 'lucide-react';
 
 const VIEW_TITLES = {
   home: Home, notes: FileText, tasks: CheckSquare, calendar: CalendarDays,
@@ -11,7 +11,7 @@ const VIEW_NAMES = {
   favorites:'Favoritos', shared:'Compartido', trash:'Papelera', editor:'Nota',
 };
 
-function TopBar({ activeView, onSearchOpen, onNewNote, onNewTask, onMenuOpen, noteTitle }) {
+function TopBar({ activeView, onSearchOpen, onNewNote, onNewTask, noteTitle }) {
   const Icon  = VIEW_TITLES[activeView] || Home;
   const title = activeView === 'editor' && noteTitle ? noteTitle : (VIEW_NAMES[activeView] || 'Inicio');
 
@@ -30,25 +30,20 @@ function TopBar({ activeView, onSearchOpen, onNewNote, onNewTask, onMenuOpen, no
   };
 
   return (
-    <header className="h-14 bg-surface/50 backdrop-blur-md border-b border-border flex items-center justify-between px-4 sm:px-6 shrink-0 sticky top-0 z-10 w-full">
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button 
-          onClick={onMenuOpen}
-          className="p-1.5 hover:bg-surfaceHover rounded-lg text-textMuted md:hidden"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <Icon className="hidden xs:block w-5 h-5 text-primaryHover" />
-        <h1 className="text-sm font-bold text-textMain tracking-wide truncate max-w-[100px] sm:max-w-none">{title}</h1>
+    <header className="h-14 bg-surface/50 backdrop-blur-md border-b border-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-10 w-full">
+      <div className="flex items-center gap-3 shrink-0">
+        <Icon className="w-5 h-5 text-primaryHover" />
+        <h1 className="text-sm font-bold text-textMain tracking-wide">{title}</h1>
       </div>
       
-      <div className="flex-1 flex justify-center px-2 sm:px-4">
+      <div className="flex-1 flex justify-center px-4">
         <button 
-          className="flex items-center gap-2 bg-background border border-border hover:border-border/80 rounded-full px-4 py-1.5 min-w-0 sm:min-w-[240px] max-w-[360px] w-full text-textMuted transition-all group"
+          className="flex items-center gap-2 bg-background border border-border hover:border-border/80 rounded-full px-4 py-1.5 min-w-[240px] max-w-[360px] w-full text-textMuted transition-all group"
           onClick={onSearchOpen}
         >
-          <Search className="w-3.5 h-3.5 group-hover:text-primary transition-colors shrink-0" />
-          <span className="text-[13px] flex-1 text-left truncate hidden xs:inline">Buscar...</span>
+          <Search className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
+          <span className="text-[13px] flex-1 text-left">Buscar...</span>
+          <kbd className="hidden sm:inline-block text-[10px] bg-surface font-semibold px-1.5 py-0.5 rounded border border-border/50 text-textMuted/80">Ctrl K</kbd>
         </button>
       </div>
 
