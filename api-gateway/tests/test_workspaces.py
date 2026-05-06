@@ -8,6 +8,10 @@ from sqlalchemy.orm import sessionmaker
 
 from app.main import app
 from app.database import Base, get_db
+from app.limiter import limiter
+
+# Desactivar Rate Limiting para los tests
+limiter.enabled = False
 
 # Base de datos en memoria para tests
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./test.db"
@@ -22,9 +26,6 @@ def override_get_db():
     finally:
         db.close()
 
-
-# Desactivar Rate Limiting para los tests
-app.state.limiter = None
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
