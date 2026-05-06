@@ -104,31 +104,36 @@ function FavoritesView({ activeWorkspace, onOpenNote }) {
           <h3 className="text-xs font-bold text-textMuted uppercase tracking-widest mb-4 flex items-center gap-2">
             <CheckSquare className="w-4 h-4" /> Tareas favoritas ({tasks.length})
           </h3>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {tasks.map(task => (
               <div
                 key={task.id}
-                className="flex items-center gap-4 bg-surface border border-warning/20 hover:border-warning/60 rounded-xl p-4 transition-all group"
+                className="bg-surface border border-warning/20 hover:border-warning/60 rounded-xl p-5 cursor-pointer transition-all hover:shadow-[0_0_15px_rgba(251,191,36,0.1)] group relative"
               >
-                <Star className="w-4 h-4 text-warning fill-warning shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <span className={`text-sm font-bold ${task.completed ? 'line-through text-textMuted' : 'text-textMain'}`}>
-                    {task.title}
-                  </span>
-                  {task.description && (
-                    <p className="text-xs text-textMuted truncate mt-0.5">{task.description}</p>
-                  )}
+                <div className="flex justify-between items-start mb-3">
+                  <Star className="w-4 h-4 text-warning fill-warning shrink-0" />
+                  <button
+                    onClick={e => handleUnpinTask(task, e)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-warning/10 text-textMuted hover:text-warning text-xs font-bold"
+                    title="Quitar de favoritos"
+                  >
+                    Quitar
+                  </button>
+                </div>
+                <h4 className={`text-sm font-bold mb-2 truncate ${task.completed ? 'line-through text-textMuted' : 'text-textMain'}`}>
+                  {task.title}
+                </h4>
+                <p className="text-xs text-textMuted line-clamp-2 leading-relaxed mb-3">
+                  {task.description || 'Sin descripción...'}
+                </p>
+                <div className="flex items-center justify-between">
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${PRIORITY_COLOR[task.priority] || 'text-textMuted'}`}>
                     {PRIORITY_LABEL[task.priority] || task.priority}
                   </span>
+                  <span className="text-[10px] text-textMuted/60">
+                    {new Date(task.created_at).toLocaleDateString('es-ES', { day:'2-digit', month:'short' })}
+                  </span>
                 </div>
-                <button
-                  onClick={e => handleUnpinTask(task, e)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold text-textMuted hover:text-warning px-2 py-1 rounded hover:bg-warning/10"
-                  title="Quitar de favoritos"
-                >
-                  Quitar
-                </button>
               </div>
             ))}
           </div>
