@@ -105,3 +105,117 @@ Si encuentras una vulnerabilidad de seguridad en este proyecto:
 2. Envía un correo a: `ROBERTOUNIVERSIDAD1@GMAIL.COM`
 3. Incluye: descripción del problema, pasos para reproducir, impacto estimado.
 4. Tiempo de respuesta esperado: 48 horas.
+
+## Interpretación de Reportes de Seguridad
+
+### Cómo leer un reporte de Gitleaks
+
+Gitleaks busca secretos filtrados (API keys, contraseñas, tokens) en el historial de Git.
+
+```
+Finding:  POSTGRES_PASSWORD=mi-contraseña-insegura
+Secret:   mi-contraseña-insegura
+RuleID:   generic-api-key
+Entropy:  3.52
+File:     .env
+Line:     3
+Commit:   abc1234
+```
+
+| Campo | Significado |
+|-------|-------------|
+| `Finding` | La línea completa donde se encontró el secreto |
+| `Secret` | El valor detectado como secreto |
+| `RuleID` | La regla que lo detectó (ej. `generic-api-key`, `private-key`) |
+| `Entropy` | Medida de aleatoriedad (mayor = más probable que sea un secreto real) |
+| `File` | Archivo donde se encontró |
+| `Commit` | Hash del commit donde se introdujo |
+
+**Acción**: Si es un secreto real, rotarlo inmediatamente y eliminarlo del historial de Git.
+
+### Cómo leer un reporte de Bandit
+
+Bandit analiza código Python buscando patrones inseguros (SAST).
+
+```
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'admin123'
+   Severity: Low   Confidence: Medium
+   Location: app/config.py:15
+```
+
+| Severidad | Significado | Acción |
+|-----------|-------------|--------|
+| **High** | Vulnerabilidad explotable | Corregir inmediatamente |
+| **Medium** | Riesgo potencial | Evaluar y corregir si aplica |
+| **Low** | Buena práctica no seguida | Evaluar si es relevante |
+
+**Códigos comunes**: `B105` (contraseña hardcoded), `B301` (pickle inseguro), `B608` (SQL injection).
+
+### Cómo leer un reporte de Trivy
+
+Trivy escanea dependencias (SCA) e imágenes Docker buscando CVEs conocidos.
+
+```
+Total: 3 (HIGH: 2, CRITICAL: 1)
+
+┌──────────────────┬────────────────┬──────────┬────────────────┬───────────────┐
+│     Library      │ Vulnerability  │ Severity │ Installed Ver. │  Fixed Ver.   │
+├──────────────────┼────────────────┼──────────┼────────────────┼───────────────┤
+│ python-jose      │ CVE-2024-33663 │ CRITICAL │ 3.3.0          │ (ninguna)     │
+│ python-multipart │ CVE-2024-53981 │ HIGH     │ 0.0.16         │ 0.0.22        │
+│ setuptools       │ CVE-2024-6345  │ HIGH     │ 69.0.0         │ 70.0.0        │
+└──────────────────┴────────────────┴──────────┴────────────────┴───────────────┘
+```
+
+| Severidad | Política del pipeline | Acción |
+|-----------|----------------------|--------|
+| **CRITICAL** | ❌ **Pipeline FALLA** | Obligatorio corregir antes de merge |
+| **HIGH** | ❌ **Pipeline FALLA** (en SCA) | Actualizar dependencia a versión fija |
+| **MEDIUM** | ⚠️ Reporta (no bloquea) | Evaluar riesgo y planificar corrección |
+| **LOW** | ℹ️ Informativo | Documentar si se acepta el riesgo |
+
+**Acción**: Actualizar la dependencia a la versión `Fixed Ver.` indicada. Si no hay fix, migrar a alternativa (como hicimos con python-jose → PyJWT).
+
+### Cómo leer un reporte de OWASP ZAP
+
+ZAP realiza análisis dinámico (DAST) escaneando la API en ejecución.
+
+```
+WARN-NEW: Content Security Policy (CSP) Header Not Set [10038]
+WARN-NEW: Missing Anti-clickjacking Header [10020]
+WARN-NEW: X-Content-Type-Options Header Missing [10021]
+PASS: SQL Injection [40018]
+PASS: Cross Site Scripting (Reflected) [40012]
+```
+
+| Resultado | Significado | Acción |
+|-----------|-------------|--------|
+| **FAIL** | Vulnerabilidad confirmada | Corregir inmediatamente |
+| **WARN-NEW** | Alerta nueva detectada | Evaluar si aplica al contexto |
+| **WARN-INPROG** | Alerta en proceso de resolución | Continuar remediación |
+| **PASS** | Prueba superada | No requiere acción |
+
+**Nota**: En nuestro proyecto, los headers de seguridad (`X-Content-Type-Options`, `X-Frame-Options`, `CSP`, `HSTS`) ya están implementados en el middleware de FastAPI (`main.py`), lo que mitiga varias de las alertas comunes de ZAP.
+
+### Cómo leer un reporte de Checkov
+
+Checkov analiza la configuración de infraestructura (Dockerfiles, docker-compose, Terraform).
+
+```
+Passed checks: 12, Failed checks: 3, Skipped checks: 2
+
+Check: CKV_DOCKER_2: "Ensure that HEALTHCHECK instructions have been added"
+  FAILED for resource: api-gateway/Dockerfile
+  
+Check: CKV_DOCKER_3: "Ensure that a user for the container has been created"
+  PASSED for resource: api-gateway/Dockerfile
+```
+
+| Resultado | Significado |
+|-----------|-------------|
+| **PASSED** | La configuración cumple la buena práctica |
+| **FAILED** | La configuración no cumple — evaluar si es relevante |
+| **SKIPPED** | Check excluido por configuración (`skip_check` en pipeline) |
+
+**Nota**: Algunos checks se excluyen intencionalmente con `skip_check` en el pipeline cuando no son aplicables al contexto del proyecto (ej. `CKV_DOCKER_2` si el healthcheck se define en docker-compose).
+

@@ -9,6 +9,8 @@
 [![DevSecOps Pipeline](https://github.com/ROBERT0024/sevwork/actions/workflows/devsecops.yml/badge.svg)](https://github.com/ROBERT0024/sevwork/actions/workflows/devsecops.yml)
 [![License: MIT](https://img.shields.io/badge/Licencia-MIT-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](docker-compose.yml)
+[![Version](https://img.shields.io/badge/Versión-1.0.0-blue.svg)](https://github.com/ROBERT0024/sevwork/releases)
+[![Coverage](https://img.shields.io/badge/Cobertura-Pytest--Cov-yellow.svg)](https://github.com/ROBERT0024/sevwork/actions)
 
 > Aplicación tipo Notion (versión simplificada) con pipeline **DevSecOps** completo.
 > Proyecto final de especialización en Ciberseguridad.
@@ -141,7 +143,7 @@ docker compose -f docker-compose.hub.yml down
 sevwork/
 ├── api-gateway/          # Backend FastAPI (API REST + Auth)
 │   ├── app/              # Código fuente
-│   ├── tests/            # Pruebas unitarias
+│   ├── tests/            # Pruebas unitarias (auth, workspaces, notes)
 │   ├── Dockerfile        # Imagen Docker (no-root)
 │   └── requirements.txt  # Dependencias Python
 ├── frontend/             # Frontend React + Vite
@@ -152,16 +154,27 @@ sevwork/
 │   ├── tasks.py          # Tareas asíncronas
 │   └── Dockerfile        # Imagen Docker (no-root)
 ├── infraestructura/
+│   ├── terraform/        # IaC con Terraform (VPC, EC2, SG)
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
 │   └── ansible/          # Playbooks de despliegue automatizado
+│       └── site.yml
+├── orquestacion/         # Orquestación de producción
+│   ├── docker-compose.prod.yml  # Compose para producción
+│   └── docker-swarm.yml  # Docker Swarm con secrets
 ├── docs/                 # Documentación completa
 │   ├── architecture.md   # Arquitectura + diagramas UML
 │   ├── threat-model.md   # Modelo de amenazas (DFD + STRIDE)
-│   ├── security.md       # Controles de seguridad
-│   ├── deployment.md     # Guía de despliegue
-│   ├── development.md    # Guía de desarrollo
-│   └── user-manual.md    # Manual de usuario
+│   ├── threat-model.json # OWASP Threat Dragon (exportado)
+│   ├── security.md       # Controles de seguridad + interpretación reportes
+│   ├── deployment.md     # Guía de despliegue + troubleshooting
+│   ├── development.md    # Guía de desarrollo + tests + contribuir
+│   ├── user-manual.md    # Manual de usuario con capturas
+│   └── images/           # Capturas de pantalla
 ├── .github/workflows/
 │   └── devsecops.yml     # Pipeline CI/CD completo
+├── .pre-commit-config.yaml # Hooks pre-commit (Gitleaks, Bandit)
 ├── docker-compose.yml    # Orquestación local (build desde código)
 ├── docker-compose.hub.yml # Orquestación con imágenes de Docker Hub
 ├── LICENSE               # Licencia MIT

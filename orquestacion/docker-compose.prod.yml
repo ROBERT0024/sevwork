@@ -1,0 +1,128 @@
+# Docker Compose — Producción Simulada
+# Configuración optimizada para entorno de producción
+# Uso: docker compose -f orquestacion/docker-compose.prod.yml up -d
+
+services:
+  # ──── Base de Datos (Producción) ────
+  postgres:
+    image: postgres:15-alpine
+    container_name: sw-prod-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - sw-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    restart: always
+    # Nota: NO se expone el puerto 5432 externamente en producción
+
+  # ──── Broker de Mensajes (Producción) ────
+  redis:
+    image: redis:7-alpine
+    container_name: sw-prod-redis
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - sw-prod-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+    restart: always
+    # Nota: NO se expone el puerto 6379 externamente en producción
+
+  # ──── API Gateway (Producción) ────
+  api-gateway:
+    image: robert0024/sevwork:api-latest
+    container_name: sw-prod-api
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sw-prod-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+      replicas: 2
+    restart: always
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ──── Worker Celery (Producción) ────
+  worker:
+    image: robert0024/sevwork:worker-latest
+    container_name: sw-prod-worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sw-prod-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+    restart: always
+
+  # ──── Frontend (Producción) ────
+  frontend:
+    image: robert0024/sevwork:frontend-latest
+    container_name: sw-prod-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - sw-prod-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+    restart: always
+
+# ──── Volúmenes persistentes ────
+volumes:
+  postgres_prod_data:
+    driver: local
+
+# ──── Red interna aislada (producción) ────
+networks:
+  sw-prod-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

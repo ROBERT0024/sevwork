@@ -14,6 +14,8 @@ http://localhost:3000
 
 ## Registro de Usuario
 
+![Pantalla de inicio de sesión](images/login-screen.png)
+
 1. En la pantalla de inicio, haz clic en **"¿No tienes cuenta? Regístrate"**.
 2. Completa los campos:
    - **Correo electrónico**: Tu dirección de email (ejemplo: `usuario@correo.com`).
@@ -38,6 +40,8 @@ http://localhost:3000
 
 ## Dashboard — Panel Principal
 
+![Panel principal (Dashboard)](images/dashboard-screen.png)
+
 Al ingresar verás tres secciones principales:
 
 ### Espacios de Trabajo (sidebar izquierdo)
@@ -46,12 +50,15 @@ Los espacios de trabajo son como carpetas para organizar tus notas.
 
 - **Crear un espacio**: Automáticamente se crea "Mi Espacio" la primera vez.
 - **Seleccionar un espacio**: Haz clic en el nombre del espacio para ver sus notas.
+- **Renombrar un espacio**: Haz clic en el ícono de editar junto al nombre del espacio.
+- **Eliminar un espacio**: Haz clic en el ícono de basura. Se eliminarán todas las notas dentro.
 
 ### Crear una Nota
 
 1. En la sección **"Nueva Nota"**:
    - Escribe el **título** de la nota.
    - Escribe el **contenido** en el área de texto.
+   - Opcionalmente selecciona una **etiqueta** para organizar la nota.
 2. Haz clic en **"Crear nota"**.
 3. La nota aparecerá en la lista inferior.
 
@@ -62,8 +69,16 @@ Los espacios de trabajo son como carpetas para organizar tus notas.
 Las notas se muestran como tarjetas con:
 - **Título** en negrita.
 - **Contenido** (vista previa).
+- **Etiqueta** de color (si tiene una asignada).
 - **Conteo de palabras** (icono 📊).
 - **Fecha de creación**.
+- **Indicador de fijada** (📌) si está marcada como importante.
+
+### Editar una Nota
+
+1. Haz clic en la tarjeta de la nota que deseas editar.
+2. Modifica el **título**, **contenido**, **etiqueta** o marca como **fijada**.
+3. Los cambios se guardan al confirmar.
 
 ### Eliminar una Nota
 
@@ -71,6 +86,13 @@ Las notas se muestran como tarjetas con:
 2. La nota se eliminará inmediatamente.
 
 > **Advertencia**: La eliminación es permanente. No hay opción de deshacer.
+
+### Fijar una Nota
+
+Las notas fijadas aparecen siempre al inicio de la lista, independientemente de la fecha de creación.
+
+1. Edita la nota y activa la opción **"Fijar nota"**.
+2. La nota se moverá al inicio con un indicador 📌.
 
 ## Cerrar Sesión
 
@@ -102,8 +124,11 @@ http://localhost:8000/docs
 | POST | `/auth/login` | Iniciar sesión | No |
 | GET | `/workspaces/` | Listar espacios | Sí (JWT) |
 | POST | `/workspaces/` | Crear espacio | Sí (JWT) |
+| PATCH | `/workspaces/{id}` | Editar espacio | Sí (JWT) |
+| DELETE | `/workspaces/{id}` | Eliminar espacio | Sí (JWT) |
 | GET | `/notes/` | Listar notas | Sí (JWT) |
 | POST | `/notes/` | Crear nota | Sí (JWT) |
+| PUT | `/notes/{id}` | Editar nota | Sí (JWT) |
 | DELETE | `/notes/{id}` | Eliminar nota | Sí (JWT) |
 
 ## Preguntas Frecuentes
@@ -119,3 +144,9 @@ No, la eliminación es permanente. Asegúrate antes de eliminar.
 
 **¿Qué hago si olvido mi contraseña?**
 Actualmente no hay funcionalidad de recuperación de contraseña. Contacta al administrador del sistema.
+
+**¿Cuántas notas puedo crear?**
+No hay límite definido. El único límite es el almacenamiento disponible en el servidor.
+
+**¿Mis notas están encriptadas?**
+Las notas se almacenan en la base de datos PostgreSQL protegida por credenciales y red Docker aislada. La conexión interna entre servicios está dentro de una red privada.

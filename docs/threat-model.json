@@ -1,0 +1,407 @@
+{
+  "version": "2.2.0",
+  "summary": {
+    "title": "Secure Workspace — Modelo de Amenazas",
+    "owner": "ROBERT0024",
+    "description": "Modelo de amenazas para la aplicación Secure Workspace, una plataforma tipo Notion con arquitectura de microservicios y pipeline DevSecOps. Generado siguiendo la metodología STRIDE con OWASP Threat Dragon.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      { "name": "ROBERT0024" },
+      { "name": "diegohrnz89-ai" },
+      { "name": "Carlos.Gonzalez" },
+      { "name": "danielmaodaza" }
+    ],
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "DFD Nivel 0 — Contexto del Sistema",
+        "diagramType": "STRIDE",
+        "placeholder": "Diagrama de contexto del sistema Secure Workspace",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "version": "2.2.0",
+        "cells": [
+          {
+            "position": { "x": 50, "y": 200 },
+            "size": { "width": 112.5, "height": 60 },
+            "attrs": {
+              "text": { "text": "Usuario" },
+              "body": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "visible": true,
+            "shape": "actor",
+            "id": "actor-user",
+            "zIndex": 1,
+            "data": {
+              "type": "tm.Actor",
+              "name": "Usuario",
+              "description": "Usuario final que accede a la aplicación web a través del navegador",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "providesAuthentication": false,
+              "threats": []
+            }
+          },
+          {
+            "position": { "x": 350, "y": 170 },
+            "size": { "width": 200, "height": 120 },
+            "attrs": {
+              "text": { "text": "Secure Workspace" },
+              "body": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "visible": true,
+            "shape": "process",
+            "id": "process-sw",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "Secure Workspace",
+              "description": "Sistema completo de gestión de notas y workspaces con autenticación JWT, base de datos PostgreSQL, broker Redis y worker Celery",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "privilegeLevel": "high",
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeWidth": 1.5, "strokeDasharray": null }
+            },
+            "id": "flow-user-to-sw",
+            "zIndex": 3,
+            "source": { "cell": "actor-user" },
+            "target": { "cell": "process-sw" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "HTTPS Request",
+              "description": "Peticiones HTTP/HTTPS del usuario al sistema (login, CRUD de notas/workspaces)",
+              "outOfScope": false,
+              "isBidirectional": true,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          }
+        ]
+      },
+      {
+        "id": 1,
+        "title": "DFD Nivel 1 — Flujo Interno de Datos",
+        "diagramType": "STRIDE",
+        "placeholder": "Diagrama detallado de flujo de datos internos",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "version": "2.2.0",
+        "cells": [
+          {
+            "position": { "x": 50, "y": 250 },
+            "size": { "width": 112.5, "height": 60 },
+            "shape": "actor",
+            "id": "actor-user-l1",
+            "zIndex": 1,
+            "data": {
+              "type": "tm.Actor",
+              "name": "Usuario",
+              "description": "Usuario final que interactúa con el Frontend a través del navegador",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "threats": []
+            }
+          },
+          {
+            "position": { "x": 250, "y": 240 },
+            "size": { "width": 160, "height": 80 },
+            "shape": "process",
+            "id": "process-frontend",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "1.0 Frontend (React + Nginx)",
+              "description": "SPA React servida por Nginx. Renderiza la interfaz y envía peticiones REST al API Gateway",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "threats": []
+            }
+          },
+          {
+            "position": { "x": 500, "y": 150 },
+            "size": { "width": 160, "height": 80 },
+            "shape": "process",
+            "id": "process-api",
+            "zIndex": 3,
+            "data": {
+              "type": "tm.Process",
+              "name": "2.0 API Gateway (FastAPI)",
+              "description": "Backend principal. Maneja autenticación JWT, autorización por roles, CRUD de recursos y despacho de tareas al broker",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "privilegeLevel": "high",
+              "threats": [
+                {
+                  "id": "t1",
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Spoofing — Suplantación de identidad",
+                  "type": "Spoofing",
+                  "description": "Un atacante podría falsificar tokens JWT para hacerse pasar por otro usuario",
+                  "mitigation": "JWT firmado con HS256, expiración corta (30 min), refresh tokens separados con rotación"
+                },
+                {
+                  "id": "t2",
+                  "status": "Mitigated",
+                  "severity": "Critical",
+                  "title": "Tampering — Inyección SQL",
+                  "type": "Tampering",
+                  "description": "Un atacante podría inyectar SQL malicioso a través de los endpoints",
+                  "mitigation": "ORM SQLAlchemy con consultas parametrizadas. Validación estricta con Pydantic en cada endpoint"
+                },
+                {
+                  "id": "t3",
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Repudiation — Negación de acciones",
+                  "type": "Repudiation",
+                  "description": "Un usuario podría negar haber realizado acciones sobre sus datos",
+                  "mitigation": "Timestamps created_at/updated_at en todos los modelos. Logs con user_id del token JWT"
+                },
+                {
+                  "id": "t4",
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Information Disclosure — IDOR",
+                  "type": "Information disclosure",
+                  "description": "Un usuario autenticado podría acceder a notas/workspaces de otros usuarios manipulando IDs",
+                  "mitigation": "Todas las queries filtran por user_id del token actual (protección IDOR). No se exponen datos de otros usuarios"
+                },
+                {
+                  "id": "t5",
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Denial of Service — Spam de registros",
+                  "type": "Denial of service",
+                  "description": "Un atacante podría saturar el endpoint de registro con peticiones masivas",
+                  "mitigation": "Rate limiting con slowapi en el API Gateway. Nginx como reverse proxy con buffer de conexiones"
+                },
+                {
+                  "id": "t6",
+                  "status": "Mitigated",
+                  "severity": "Critical",
+                  "title": "Elevation of Privilege — Acceso a endpoints admin",
+                  "type": "Elevation of privilege",
+                  "description": "Un usuario con rol 'user' podría acceder a endpoints protegidos para administradores",
+                  "mitigation": "Decorador require_role() en FastAPI. Validación de rol en cada endpoint protegido antes de ejecutar la lógica"
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": 500, "y": 320 },
+            "size": { "width": 160, "height": 80 },
+            "shape": "process",
+            "id": "process-auth",
+            "zIndex": 4,
+            "data": {
+              "type": "tm.Process",
+              "name": "2.1 Autenticación (JWT + bcrypt)",
+              "description": "Subproceso de autenticación: hash de contraseñas con bcrypt, generación y validación de JWT",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "threats": []
+            }
+          },
+          {
+            "position": { "x": 750, "y": 250 },
+            "size": { "width": 160, "height": 80 },
+            "shape": "process",
+            "id": "process-worker",
+            "zIndex": 5,
+            "data": {
+              "type": "tm.Process",
+              "name": "3.0 Worker (Celery)",
+              "description": "Proceso asíncrono que consume tareas del broker Redis. Ejecuta conteo de palabras y limpieza de notas antiguas",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "threats": []
+            }
+          },
+          {
+            "position": { "x": 750, "y": 80 },
+            "size": { "width": 160, "height": 60 },
+            "shape": "store",
+            "id": "store-postgres",
+            "zIndex": 6,
+            "data": {
+              "type": "tm.Store",
+              "name": "D1: PostgreSQL",
+              "description": "Base de datos relacional. Almacena usuarios (con hash bcrypt), workspaces, notas y tareas",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "isALog": false,
+              "isEncrypted": false,
+              "isSigned": false,
+              "storesCredentials": true,
+              "threats": [
+                {
+                  "id": "t7",
+                  "status": "Mitigated",
+                  "severity": "Critical",
+                  "title": "Information Disclosure — Filtración de credenciales",
+                  "type": "Information disclosure",
+                  "description": "Si se accede directamente a la base de datos, las contraseñas podrían ser expuestas",
+                  "mitigation": "Contraseñas almacenadas como hash bcrypt con salt. Red Docker aislada (sw-network). Acceso restringido por credenciales en .env"
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": 750, "y": 420 },
+            "size": { "width": 160, "height": 60 },
+            "shape": "store",
+            "id": "store-redis",
+            "zIndex": 7,
+            "data": {
+              "type": "tm.Store",
+              "name": "D2: Redis (Broker)",
+              "description": "Broker de mensajes para Celery. Almacena la cola de tareas asíncronas de forma temporal",
+              "outOfScope": false,
+              "hasOpenThreats": false,
+              "isALog": false,
+              "isEncrypted": false,
+              "isSigned": false,
+              "storesCredentials": false,
+              "threats": [
+                {
+                  "id": "t8",
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Tampering — Manipulación de cola de tareas",
+                  "type": "Tampering",
+                  "description": "Un atacante con acceso a la red podría inyectar tareas maliciosas en la cola de Redis",
+                  "mitigation": "Redis accesible solo dentro de la red Docker aislada (sw-network). No expuesto externamente en producción"
+                }
+              ]
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-user-frontend",
+            "source": { "cell": "actor-user-l1" },
+            "target": { "cell": "process-frontend" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "1. Credenciales / Datos",
+              "description": "El usuario ingresa credenciales y datos de notas/workspaces a través del navegador",
+              "isBidirectional": true,
+              "isEncrypted": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-frontend-api",
+            "source": { "cell": "process-frontend" },
+            "target": { "cell": "process-api" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "2. HTTP + JWT Bearer",
+              "description": "Frontend envía peticiones REST con token JWT en header Authorization",
+              "isBidirectional": true,
+              "isEncrypted": false,
+              "protocol": "HTTP",
+              "threats": [
+                {
+                  "id": "t9",
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Information Disclosure — Token en tránsito",
+                  "type": "Information disclosure",
+                  "description": "El JWT viaja en texto plano en la red interna Docker",
+                  "mitigation": "Red Docker aislada. En producción se recomienda HTTPS con TLS. Headers de seguridad HSTS implementados"
+                }
+              ]
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-api-auth",
+            "source": { "cell": "process-api" },
+            "target": { "cell": "process-auth" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "3. Verificación de credenciales",
+              "description": "API Gateway delega la autenticación al subproceso auth que verifica bcrypt y genera JWT",
+              "isBidirectional": true,
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-api-postgres",
+            "source": { "cell": "process-api" },
+            "target": { "cell": "store-postgres" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "4. CRUD Datos (SQLAlchemy ORM)",
+              "description": "API Gateway ejecuta operaciones CRUD sobre PostgreSQL a través del ORM SQLAlchemy con consultas parametrizadas",
+              "isBidirectional": true,
+              "protocol": "TCP",
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-api-redis",
+            "source": { "cell": "process-api" },
+            "target": { "cell": "store-redis" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "5. Despacha tarea Celery",
+              "description": "API Gateway encola tareas asíncronas (count_words) en Redis para que el Worker las procese",
+              "isBidirectional": false,
+              "protocol": "TCP",
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-redis-worker",
+            "source": { "cell": "store-redis" },
+            "target": { "cell": "process-worker" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "6. Consume tarea",
+              "description": "Worker Celery consume tareas de la cola Redis y las ejecuta",
+              "isBidirectional": false,
+              "protocol": "TCP/AMQP",
+              "threats": []
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "flow-worker-postgres",
+            "source": { "cell": "process-worker" },
+            "target": { "cell": "store-postgres" },
+            "data": {
+              "type": "tm.Flow",
+              "name": "7. Actualiza datos procesados",
+              "description": "Worker escribe resultados (word_count) directamente en PostgreSQL vía SQLAlchemy",
+              "isBidirectional": true,
+              "protocol": "TCP",
+              "threats": []
+            }
+          }
+        ]
+      }
+    ],
+    "diagramTop": 2,
+    "reviewer": "Equipo DevSecOps",
+    "threatTop": 10
+  }
+}

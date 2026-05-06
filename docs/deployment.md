@@ -168,3 +168,151 @@ docker exec sw-postgres pg_dump -U securews securews > backup_$(date +%Y%m%d).sq
 # Restaurar backup
 cat backup_20260321.sql | docker exec -i sw-postgres psql -U securews securews
 ```
+
+## Opción 3: Despliegue con Terraform (AWS)
+
+Para desplegar en Amazon Web Services:
+
+### 1. Configurar credenciales AWS
+
+```bash
+aws configure
+```
+
+### 2. Inicializar y aplicar Terraform
+
+```bash
+cd infraestructura/terraform
+terraform init
+terraform plan -var="db_password=ContraseñaSegura123!" -var="jwt_secret_key=clave-jwt-segura-64-chars"
+terraform apply
+```
+
+### 3. Verificar el despliegue
+
+```bash
+terraform output app_url
+terraform output ssh_command
+```
+
+## Opción 4: Orquestación con Docker Swarm
+
+Para producción con múltiples nodos:
+
+```bash
+# Inicializar Swarm
+docker swarm init
+
+# Crear secretos
+echo "ContraseñaDB" | docker secret create db_password -
+echo "ClaveJWT64chars" | docker secret create jwt_secret -
+
+# Desplegar el stack
+docker stack deploy -c orquestacion/docker-swarm.yml sw
+
+# Verificar servicios
+docker stack services sw
+```
+
+## Resolución de Problemas (Troubleshooting)
+
+### Error: "Cannot connect to Docker daemon"
+
+**Causa**: Docker no está iniciado.
+
+```bash
+# Windows: Abrir Docker Desktop
+# Linux:
+sudo systemctl start docker
+```
+
+### Error: "port is already allocated" (Puerto ya en uso)
+
+**Causa**: Otro servicio está usando el puerto 3000, 8000 o 5432.
+
+```bash
+# Ver qué proceso usa el puerto (ejemplo: 8000)
+# Windows:
+netstat -ano | findstr :8000
+# Linux:
+sudo lsof -i :8000
+
+# Solución: Detener el proceso o cambiar el puerto en docker-compose.yml
+```
+
+### Error: "database connection refused"
+
+**Causa**: PostgreSQL aún no está listo cuando la API intenta conectarse.
+
+```bash
+# Verificar que PostgreSQL está corriendo y saludable
+docker-compose ps
+docker-compose logs postgres
+
+# Reiniciar solo la API (PostgreSQL ya debería estar listo)
+docker-compose restart api-gateway
+```
+
+### Error: "FATAL: password authentication failed"
+
+**Causa**: Las credenciales del `.env` no coinciden con las de PostgreSQL.
+
+```bash
+# Solución: Eliminar el volumen y recrear la BD
+docker-compose down -v
+docker-compose up --build -d
+```
+
+> ⚠️ **ADVERTENCIA**: `docker-compose down -v` elimina todos los datos.
+
+### Error: "JWT decode error" o "Token inválido"
+
+**Causa**: La clave JWT cambió entre reinicios.
+
+```bash
+# Verificar que JWT_SECRET_KEY en .env no ha cambiado
+cat .env | grep JWT_SECRET_KEY
+
+# Solución: Cerrar sesión en el frontend y volver a iniciar sesión
+```
+
+### El Worker no procesa tareas
+
+**Causa**: Redis no está accesible o el Worker no se conecta.
+
+```bash
+# Verificar que Redis responde
+docker exec sw-redis redis-cli ping
+# Debería responder: PONG
+
+# Ver los logs del Worker
+docker-compose logs -f worker
+
+# Reiniciar Worker
+docker-compose restart worker
+```
+
+### El Frontend no se conecta a la API
+
+**Causa**: CORS o la API no está disponible.
+
+```bash
+# Verificar que la API responde
+curl http://localhost:8000/
+# Debería responder: {"status":"ok","service":"secure-workspace-api"}
+
+# Ver logs de la API
+docker-compose logs -f api-gateway
+```
+
+### Docker Compose no encuentra el archivo .env
+
+```bash
+# Verificar que existe
+ls -la .env
+
+# Si no existe, crear desde el ejemplo
+cp .env.example .env     # Linux/Mac
+copy .env.example .env   # Windows
+```
+

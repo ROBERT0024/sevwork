@@ -259,14 +259,31 @@ jobs:
           cd api-gateway
           pip install -r requirements.txt
 
-      - name: "✅ Ejecutar Pytest"
+      - name: "✅ Ejecutar Pytest con Cobertura"
         run: |
           cd api-gateway
-          pytest tests/ -v --tb=short
+          pytest tests/ -v --tb=short --cov=app --cov-report=xml:coverage.xml --cov-report=term-missing
         env:
           DATABASE_URL: "sqlite:///./test.db"
           JWT_SECRET_KEY: "test-secret-key-only-for-ci"
           REDIS_URL: "redis://localhost:6379/0"
+
+      - name: "📊 Resumen de Cobertura"
+        if: always()
+        run: |
+          echo "## 🧪 Reporte de Pruebas Unitarias" >> $GITHUB_STEP_SUMMARY
+          if [ -f api-gateway/coverage.xml ]; then
+            echo "✅ Pruebas ejecutadas con reporte de cobertura generado." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No se generó reporte de cobertura." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: api-gateway/coverage.xml
 
   dast:
     name: "🌐 OWASP ZAP (DAST)"
