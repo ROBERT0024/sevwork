@@ -23,6 +23,9 @@ def override_get_db():
         db.close()
 
 
+# Desactivar Rate Limiting para los tests
+app.state.limiter = None
+
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
@@ -35,14 +38,14 @@ def setup_database():
     Base.metadata.drop_all(bind=engine_test)
 
 
-def get_auth_token():
+def get_auth_token(email="test@example.com"):
     """Helper: registra un usuario y devuelve el token de acceso."""
     client.post("/auth/register", json={
-        "email": "wstest@example.com",
+        "email": email,
         "password": "password123",
     })
     response = client.post("/auth/login", json={
-        "email": "wstest@example.com",
+        "email": email,
         "password": "password123",
     })
     return response.json()["access_token"]
