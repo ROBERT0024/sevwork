@@ -16,6 +16,8 @@ http://localhost:3000
 
 ## 📝 2. Crear tu cuenta por primera vez
 
+![Pantalla de Inicio de Sesión y Registro](images/Pantalla%20de%20Inicio.png)
+
 Antes de guardar tus secretos y tareas, necesitas una cuenta personal. Así nadie más podrá ver tu información.
 
 1.  **Regístrate**: En la pantalla de inicio, busca el texto que dice **"¿No tienes cuenta? Regístrate"** y haz clic ahí.
@@ -30,11 +32,16 @@ Antes de guardar tus secretos y tareas, necesitas una cuenta personal. Así nadi
 
 ## 📊 3. Tu Dashboard (Tu Centro de Control)
 
+![Vista general del Dashboard](images/Dashboard.png)
+
 Nada más entrar, verás una pantalla con gráficos y números. Es tu resumen personal para que sepas cómo vas con tus cosas:
 
 *   **Notas**: Es el total de hojas de información que has escrito.
 *   **Tareas Completadas**: Te dice cuántas cosas has terminado de tu lista de pendientes.
 *   **Favoritos**: Aquí aparecen las cosas que marcaste con una estrella porque son muy importantes.
+
+![Sección de Favoritos](images/Pantalla%20de%20Favoritos.png)
+
 *   **Productividad**: Es una barra de progreso. ¡Intenta que llegue al 100%!
 *   **🔥 Racha (Streak)**: Si completas tareas varios días seguidos, aparecerá un fueguito. ¡Es un reto para que no dejes de avanzar!
 
@@ -53,6 +60,8 @@ Imagina que los **Espacios de Trabajo** son cajones o carpetas. Puedes tener uno
 
 ## ✍️ 5. Cómo usar las Notas
 
+![Vista de la sección de Notas](images/Pantalla%20de%20Notas.png)
+
 Las **Notas** son como hojas de papel infinitas donde puedes escribir lo que quieras: ideas, borradores, listas de compras, etc.
 
 1.  **Crear**: Haz clic en el botón **"Nueva Nota"**.
@@ -67,6 +76,8 @@ Las **Notas** son como hojas de papel infinitas donde puedes escribir lo que qui
 
 ## ✅ 6. Cómo usar las Tareas (To-Do List)
 
+![Vista de la sección de Tareas](images/Pantalla%20de%20Tareas.png)
+
 A diferencia de las notas, las **Tareas** son cosas que tienes que "hacer" y "terminar".
 
 *   **🔴 Prioridad**: Puedes marcar si algo es muy urgente (rojo), normal (amarillo) o poco importante (verde).
@@ -78,6 +89,8 @@ A diferencia de las notas, las **Tareas** son cosas que tienes que "hacer" y "te
 
 ## 📅 7. El Calendario (Tu Agenda Visual)
 
+![Vista del Calendario interactivo](images/Pantalla%20calendario.png)
+
 Si te gusta ver tus tareas organizadas por días, el **Calendario** es tu mejor amigo.
 
 *   Puedes verlo por **Mes**, por **Semana** o por **Día**.
@@ -87,6 +100,8 @@ Si te gusta ver tus tareas organizadas por días, el **Calendario** es tu mejor 
 ---
 
 ## 🗑️ 8. La Papelera: ¡No entres en pánico!
+
+![Vista de la Papelera de reciclaje](images/Pantalla%20de%20Papelera.png)
 
 ¿Borraste algo por error? ¡No pasa nada!
 
@@ -98,6 +113,8 @@ Si te gusta ver tus tareas organizadas por días, el **Calendario** es tu mejor 
 ---
 
 ## 📄 9. Informe Gerencial (Para impresionar a tu jefe)
+
+![Descarga y vista del Informe Gerencial](images/Descarga%20Informe%20Gerencial.png)
 
 Si necesitas presentar un resumen de lo que has hecho en la semana:
 1.  Busca el botón **"Descargar Informe Gerencial"** en el Dashboard.
