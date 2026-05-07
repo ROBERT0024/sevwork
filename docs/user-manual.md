@@ -1,152 +1,121 @@
-# Manual de Usuario — Secure Workspace
+# 🚀 Manual de Usuario — Secure Workspace
 
-## Introducción
+¡Bienvenido a **Secure Workspace**! Esta guía está diseñada para que aprendas a usar la aplicación desde cero, de forma fácil y sin complicaciones. No importa si no eres un experto en tecnología, aquí te explicamos todo paso a paso.
 
-Secure Workspace es una aplicación web para gestionar notas y espacios de trabajo de forma segura. Este manual explica cómo usar todas las funcionalidades disponibles.
+---
 
-## Acceso a la Aplicación
+## 🏁 1. ¿Cómo entrar a la aplicación?
 
-Abre tu navegador web y ve a:
+Para usar Secure Workspace, solo necesitas abrir tu navegador de internet (como Chrome, Edge o Firefox) y escribir esta dirección en la barra de arriba:
 
 ```
 http://localhost:3000
 ```
 
-## Registro de Usuario
+---
 
-![Pantalla de inicio de sesión](images/login-screen.png)
+## 📝 2. Crear tu cuenta por primera vez
 
-1. En la pantalla de inicio, haz clic en **"¿No tienes cuenta? Regístrate"**.
-2. Completa los campos:
-   - **Correo electrónico**: Tu dirección de email (ejemplo: `usuario@correo.com`).
-   - **Contraseña**: Mínimo 8 caracteres. Se recomienda usar letras, números y símbolos.
-3. Haz clic en **"Crear cuenta"**.
-4. Si el registro es exitoso, se iniciará sesión automáticamente.
+Antes de guardar tus secretos y tareas, necesitas una cuenta personal. Así nadie más podrá ver tu información.
 
-### Errores comunes al registrarse
+1.  **Regístrate**: En la pantalla de inicio, busca el texto que dice **"¿No tienes cuenta? Regístrate"** y haz clic ahí.
+2.  **Tus datos**:
+    *   **Correo electrónico**: Escribe tu email de siempre.
+    *   **Contraseña**: Elige una palabra secreta que tenga al menos 8 letras o números. ¡No se la digas a nadie!
+3.  **Listo**: Haz clic en el botón **"Crear cuenta"**. ¡Ya estás dentro!
 
-| Error | Causa | Solución |
-|-------|-------|----------|
-| "El email ya está registrado" | Ya existe una cuenta con ese correo | Usa otro email o inicia sesión |
-| Error de validación | Contraseña muy corta | Usa al menos 8 caracteres |
+> 💡 **Tip**: Si ya tienes cuenta, solo pon tu correo y contraseña en la pantalla principal y dale a **"Iniciar sesión"**.
 
-## Inicio de Sesión
+---
 
-1. Ingresa tu **correo electrónico** y **contraseña**.
-2. Haz clic en **"Iniciar sesión"**.
-3. Serás redirigido al **Dashboard** (panel principal).
+## 📊 3. Tu Dashboard (Tu Centro de Control)
 
-> **Nota de seguridad**: Tu sesión expira automáticamente después de 30 minutos de inactividad. Esto protege tu cuenta si olvidas cerrar sesión.
+Nada más entrar, verás una pantalla con gráficos y números. Es tu resumen personal para que sepas cómo vas con tus cosas:
 
-## Dashboard — Panel Principal
+*   **Notas**: Es el total de hojas de información que has escrito.
+*   **Tareas Completadas**: Te dice cuántas cosas has terminado de tu lista de pendientes.
+*   **Favoritos**: Aquí aparecen las cosas que marcaste con una estrella porque son muy importantes.
+*   **Productividad**: Es una barra de progreso. ¡Intenta que llegue al 100%!
+*   **🔥 Racha (Streak)**: Si completas tareas varios días seguidos, aparecerá un fueguito. ¡Es un reto para que no dejes de avanzar!
 
-![Panel principal (Dashboard)](images/dashboard-screen.png)
+---
 
-Al ingresar verás tres secciones principales:
+## 📂 4. Organízate con "Espacios de Trabajo"
 
-### Espacios de Trabajo (sidebar izquierdo)
+Imagina que los **Espacios de Trabajo** son cajones o carpetas. Puedes tener uno para "Trabajo", otro para "Casa" y otro para "Universidad".
 
-Los espacios de trabajo son como carpetas para organizar tus notas.
+*   **¿Dónde están?**: En la columna de la izquierda.
+*   **Crear uno**: El sistema te crea uno llamado "Mi Espacio" para empezar, pero puedes crear más.
+*   **Cambiar nombre**: Si quieres que "Mi Espacio" se llame "Proyecto X", dale al icono del **lápiz** junto al nombre.
+*   **Borrar**: Si ya no necesitas un proyecto, usa el icono de la **papelera**. *¡Cuidado! Esto borra todo lo que haya dentro de ese cajón.*
 
-- **Crear un espacio**: Automáticamente se crea "Mi Espacio" la primera vez.
-- **Seleccionar un espacio**: Haz clic en el nombre del espacio para ver sus notas.
-- **Renombrar un espacio**: Haz clic en el ícono de editar junto al nombre del espacio.
-- **Eliminar un espacio**: Haz clic en el ícono de basura. Se eliminarán todas las notas dentro.
+---
 
-### Crear una Nota
+## ✍️ 5. Cómo usar las Notas
 
-1. En la sección **"Nueva Nota"**:
-   - Escribe el **título** de la nota.
-   - Escribe el **contenido** en el área de texto.
-   - Opcionalmente selecciona una **etiqueta** para organizar la nota.
-2. Haz clic en **"Crear nota"**.
-3. La nota aparecerá en la lista inferior.
+Las **Notas** son como hojas de papel infinitas donde puedes escribir lo que quieras: ideas, borradores, listas de compras, etc.
 
-> **Dato interesante**: Un "worker" inteligente cuenta automáticamente las palabras de tu nota en segundo plano. Verás el conteo actualizado al recargar.
+1.  **Crear**: Haz clic en el botón **"Nueva Nota"**.
+2.  **Título y Etiquetas**: Ponle un nombre (ejemplo: "Recetas de cocina") y elige una etiqueta de color para encontrarla rápido después.
+3.  **Contenido**: Escribe todo lo que necesites.
+4.  **Guardar**: Al terminar, confirma y tu nota aparecerá en la lista.
+5.  **⭐ Favoritos**: Si haces clic en la estrella de una nota, se quedará guardada en tu sección especial de favoritos para que no se te pierda.
 
-### Ver Notas
+> 🧐 **¿Sabías qué?**: El sistema cuenta las palabras de tu nota automáticamente por ti. Verás el número abajo de cada nota.
 
-Las notas se muestran como tarjetas con:
-- **Título** en negrita.
-- **Contenido** (vista previa).
-- **Etiqueta** de color (si tiene una asignada).
-- **Conteo de palabras** (icono 📊).
-- **Fecha de creación**.
-- **Indicador de fijada** (📌) si está marcada como importante.
+---
 
-### Editar una Nota
+## ✅ 6. Cómo usar las Tareas (To-Do List)
 
-1. Haz clic en la tarjeta de la nota que deseas editar.
-2. Modifica el **título**, **contenido**, **etiqueta** o marca como **fijada**.
-3. Los cambios se guardan al confirmar.
+A diferencia de las notas, las **Tareas** son cosas que tienes que "hacer" y "terminar".
 
-### Eliminar una Nota
+*   **🔴 Prioridad**: Puedes marcar si algo es muy urgente (rojo), normal (amarillo) o poco importante (verde).
+*   **📅 Fecha**: Ponle una fecha límite para que no se te olvide.
+*   **📓 Bitácora (Comentarios)**: Es un espacio para que anotes por qué te retrasaste o qué pasos diste. ¡Es muy útil para llevar un registro de tu progreso!
+*   **Marcar como lista**: Cuando termines una tarea, haz clic en el círculo de la izquierda. Se tachará y se pondrá de color verde. ¡Qué satisfacción!
 
-1. Haz clic en la **"×"** (equis) en la esquina superior derecha de la tarjeta de la nota.
-2. La nota se eliminará inmediatamente.
+---
 
-> **Advertencia**: La eliminación es permanente. No hay opción de deshacer.
+## 📅 7. El Calendario (Tu Agenda Visual)
 
-### Fijar una Nota
+Si te gusta ver tus tareas organizadas por días, el **Calendario** es tu mejor amigo.
 
-Las notas fijadas aparecen siempre al inicio de la lista, independientemente de la fecha de creación.
+*   Puedes verlo por **Mes**, por **Semana** o por **Día**.
+*   Las tareas aparecen como puntitos de colores según su importancia.
+*   **Creación rápida**: Si haces clic en un día (por ejemplo, el próximo lunes), se abrirá un panel a la derecha para que escribas una tarea para ese día sin dar muchas vueltas.
 
-1. Edita la nota y activa la opción **"Fijar nota"**.
-2. La nota se moverá al inicio con un indicador 📌.
+---
 
-## Cerrar Sesión
+## 🗑️ 8. La Papelera: ¡No entres en pánico!
 
-1. Haz clic en **"Cerrar sesión"** en la esquina superior derecha.
-2. Se borrará tu token de sesión y serás redirigido al login.
+¿Borraste algo por error? ¡No pasa nada!
 
-## Seguridad de tu Cuenta
+1.  Ve a la sección de **Papelera**.
+2.  Allí verás todo lo que has borrado recientemente.
+3.  **Restaurar**: Dale al botón de la flecha circular para devolverlo a su sitio.
+4.  **Borrar para siempre**: Si estás seguro de que ya no lo quieres, dale al botón de la "X" para borrarlo de la base de datos definitivamente.
 
-| Medida | Descripción |
-|--------|------------|
-| 🔒 Contraseña encriptada | Tu contraseña se guarda como un hash bcrypt, nunca en texto plano |
-| ⏱️ Sesión con expiración | El token de acceso expira en 30 minutos |
-| 🛡️ Datos aislados | Solo tú puedes ver tus notas y espacios de trabajo |
-| 🚫 Protección IDOR | El sistema verifica que eres el dueño antes de cada acción |
+---
 
-## API REST (para usuarios avanzados)
+## 📄 9. Informe Gerencial (Para impresionar a tu jefe)
 
-Si quieres interactuar con la API directamente, la documentación interactiva Swagger está disponible en:
+Si necesitas presentar un resumen de lo que has hecho en la semana:
+1.  Busca el botón **"Descargar Informe Gerencial"** en el Dashboard.
+2.  Se descargará un archivo PDF muy bonito y profesional con gráficos de tus tareas y notas. ¡Listo para enviar por correo o imprimir!
 
-```
-http://localhost:8000/docs
-```
+---
 
-### Endpoints disponibles
+## ❓ Preguntas Frecuentes
 
-| Método | Ruta | Descripción | Requiere Auth |
-|--------|------|-------------|---------------|
-| POST | `/auth/register` | Crear cuenta | No |
-| POST | `/auth/login` | Iniciar sesión | No |
-| GET | `/workspaces/` | Listar espacios | Sí (JWT) |
-| POST | `/workspaces/` | Crear espacio | Sí (JWT) |
-| PATCH | `/workspaces/{id}` | Editar espacio | Sí (JWT) |
-| DELETE | `/workspaces/{id}` | Eliminar espacio | Sí (JWT) |
-| GET | `/notes/` | Listar notas | Sí (JWT) |
-| POST | `/notes/` | Crear nota | Sí (JWT) |
-| PUT | `/notes/{id}` | Editar nota | Sí (JWT) |
-| DELETE | `/notes/{id}` | Eliminar nota | Sí (JWT) |
+*   **¿Qué hago si se me olvida la contraseña?** Por ahora no hay un botón de "olvidé mi contraseña", así que habla con el administrador del sistema para que te ayude.
+*   **¿Se borran mis cosas si apago la computadora?** No, todo se queda guardado de forma segura en el servidor de la aplicación (usando algo llamado Docker).
+*   **¿Puedo usarlo en el celular?** Sí, la aplicación se adapta a pantallas pequeñas. ¡Pruébalo!
 
-## Preguntas Frecuentes
+---
 
-**¿Puedo acceder desde otro dispositivo?**
-Sí, mientras estés en la misma red, accede usando la IP del servidor en lugar de `localhost`.
+## 🛡️ Seguridad para tu tranquilidad
 
-**¿Se guardan mis datos al apagar Docker?**
-Sí, los datos se almacenan en un volumen persistente de Docker (`postgres_data`).
+*   **Tus datos son solo tuyos**: Nadie más puede ver tus notas a menos que tenga tu contraseña.
+*   **Contraseñas blindadas**: No guardamos tu contraseña tal cual la escribes, la convertimos en un código secreto ilegible para mayor seguridad.
+*   **Cierre automático**: Si dejas la aplicación abierta y te vas por mucho tiempo, la sesión se cerrará sola para que nadie use tu cuenta si dejas la PC encendida.
 
-**¿Puedo recuperar una nota eliminada?**
-No, la eliminación es permanente. Asegúrate antes de eliminar.
-
-**¿Qué hago si olvido mi contraseña?**
-Actualmente no hay funcionalidad de recuperación de contraseña. Contacta al administrador del sistema.
-
-**¿Cuántas notas puedo crear?**
-No hay límite definido. El único límite es el almacenamiento disponible en el servidor.
-
-**¿Mis notas están encriptadas?**
-Las notas se almacenan en la base de datos PostgreSQL protegida por credenciales y red Docker aislada. La conexión interna entre servicios está dentro de una red privada.
