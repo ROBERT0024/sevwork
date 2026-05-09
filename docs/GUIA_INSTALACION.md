@@ -27,14 +27,15 @@
 Si no quieres usar la terminal ni escribir comandos, haz esto:
 
 1. Asegúrate de tener **Docker Desktop** abierto.
-2. **Entra a la carpeta** del proyecto (`sevwork`).
-3. Busca el archivo correspondiente a tu sistema:
+2. Descarga el proyecto desde el botón "Code" -> Download ZIP.
+3. **Entra a la carpeta donde guardaste el proyecto y descomprimelo. (`sevwork`).
+4. Busca el archivo correspondiente a tu sistema:
    - **En Windows:** Haz doble clic en el archivo `setup.bat`.
    - **En Mac o Linux:** Abre una terminal en la carpeta y escribe `sh setup.sh`.
-4. **Elige el modo de ejecución** cuando te lo pregunte:
+5. **Elige el modo de ejecución** cuando te lo pregunte:
    - **Opción 1 — Modo Local:** Construye todo desde el código fuente (ideal si quieres desarrollar o modificaste algo).
    - **Opción 2 — Modo Docker Hub:** Descarga las imágenes ya construidas (más rápido, no compila nada).
-5. El script hará todo el trabajo sucio por ti:
+6. El script hará todo el trabajo sucio por ti:
    - Verificará si Docker está realmente iniciado.
    - Revisará si hay conflictos de puertos.
    - Creará el archivo de configuración `.env` automáticamente.
